@@ -1,20 +1,21 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    app_name: str = Field(default="TasteMap", alias="APP_NAME")
+    debug: bool = Field(default=False, alias="DEBUG")
+    database_url: str = Field(alias="DATABASE_URL")
 
-    app_name: str = "TasteMap"
-    debug: bool = False
-    database_url: str = "postgresql://tastemap:tastemap@db:5432/tastemap"
-    
-    # JWT Settings
-    secret_key: str 
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 7
+    secret_key: str = Field(alias="SECRET_KEY")
+    algorithm: str = Field(default="HS256", alias="ALGORITHM")
+    access_token_expire_minutes: int = Field(default=30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
+    refresh_token_expire_days: int = Field(default=7, alias="REFRESH_TOKEN_EXPIRE_DAYS")
 
 
 settings = Settings()
