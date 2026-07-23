@@ -1,12 +1,16 @@
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import DateTime, Float, String, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.menu_item import MenuItem
 
 
 class Restaurant(Base):
@@ -63,5 +67,11 @@ class Restaurant(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    # Relationships
+    menu_items: Mapped[List["MenuItem"]] = relationship(
+        back_populates="restaurant",
+        cascade="all, delete-orphan",
     )
 
