@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.review import Review
+    from app.models.favorite import Favorite
 
 
 class User(Base):
@@ -55,6 +56,10 @@ class User(Base):
 
     # Relationships
     reviews: Mapped[List["Review"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    favorites: Mapped[List["Favorite"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
