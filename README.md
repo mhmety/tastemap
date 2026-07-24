@@ -1,10 +1,47 @@
 # 🍽️ TasteMap
 
-**Yemekleri keşfedin. Restoranları değil.**  
 **Discover food. Not restaurants.**
 
-TasteMap, kullanıcıların restoran isimleri yerine menüdeki yemeklere göre restoran keşfetmesini sağlayan bir platformdur.
+TasteMap is a SaaS application that helps users discover restaurants based on menu items instead of restaurant names.
 
-TasteMap is a menu-first restaurant discovery platform that helps users discover restaurants based on menu items instead of restaurant names.
+---
 
-> 🚧 **Current Status:** Authentication system (JWT, Register/Login) is completed. Restaurant, menu, and search features are currently in development.
+## 🚀 Current Status
+
+### ✅ Completed
+
+- User Authentication (Register / Login / JWT)
+- Role System
+- Restaurant Management
+- Menu Items
+- Reviews
+- Favorites
+- PostgreSQL Database
+- SQLAlchemy ORM
+- Alembic Migrations
+- Dockerized Development Environment
+
+### 🚧 In Progress
+
+- Search restaurants by menu items
+- Filtering system
+- Maps integration
+
+---
+
+## 🛠️ Tech Stack
+
+- Python
+- FastAPI
+- PostgreSQL
+- SQLAlchemy
+- Alembic
+- Docker
+
+---
+
+## 📌 Project Goal
+
+TasteMap aims to provide a modern restaurant discovery experience where users search for dishes rather than restaurant names.
+
+Future releases will include advanced search, maps integration, user recommendations, and cloud deployment.
