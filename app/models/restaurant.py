@@ -11,6 +11,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.menu_item import MenuItem
+    from app.models.review import Review
 
 
 class Restaurant(Base):
@@ -71,6 +72,10 @@ class Restaurant(Base):
 
     # Relationships
     menu_items: Mapped[List["MenuItem"]] = relationship(
+        back_populates="restaurant",
+        cascade="all, delete-orphan",
+    )
+    reviews: Mapped[List["Review"]] = relationship(
         back_populates="restaurant",
         cascade="all, delete-orphan",
     )
