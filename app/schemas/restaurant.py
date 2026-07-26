@@ -3,7 +3,29 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class RestaurantCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    city: str = Field(min_length=1, max_length=100)
+    district: str = Field(min_length=1, max_length=100)
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    website: Optional[str] = Field(default=None, max_length=255)
+    phone: Optional[str] = Field(default=None, max_length=50)
+    description: Optional[str] = Field(default=None, max_length=1000)
+
+
+class RestaurantUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
+    city: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    district: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    website: Optional[str] = Field(default=None, max_length=255)
+    phone: Optional[str] = Field(default=None, max_length=50)
+    description: Optional[str] = Field(default=None, max_length=1000)
 
 
 class RestaurantResponse(BaseModel):

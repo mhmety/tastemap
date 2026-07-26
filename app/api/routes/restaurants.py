@@ -2,7 +2,7 @@
 import uuid
 from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -10,8 +10,10 @@ from app.db.session import get_db
 from app.models.menu_item import MenuItem
 from app.models.restaurant import Restaurant
 from app.schemas.restaurant import (
+    RestaurantCreate,
     RestaurantDetailResponse,
     RestaurantResponse,
+    RestaurantUpdate,
 )
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
@@ -106,3 +108,98 @@ def get_restaurant_detail(
         "menu_items": list(restaurant.menu_items),
         "reviews": list(reviews),
     }
+
+
+@router.post("", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED)
+def create_restaurant(
+    data: RestaurantCreate,
+    db: Session = Depends(get_db),
+):
+    """
+    Create a new restaurant.
+
+    - **name**: Restaurant name (required, 1-255 characters)
+    - **city**: City where the restaurant is located (required, 1-100 characters)
+    - **district**: District where the restaurant is located (required, 1-100 characters)
+    - **latitude / longitude**: Optional geographic coordinates
+    - **website / phone / description**: Optional contact and information fields
+    """
+    restaurant = Restaurant(
+        name=data.name,
+        city=data.city,
+        district=data.district,
+        latitude=data.latitude,
+        longitude=data.longitude,
+        website=data.website,
+        phone=data.phone,
+        description=data.description,
+    )
+
+    db.add(restaurant)
+    db.commit()
+    db.refresh(restaurant)
+
+    return restaurant
+
+
+@router.put("/{restaurant_id}", response_model=RestaurantResponse)
+def update_restaurant(
+    restaurant_id: uuid.UUID,
+    data: RestaurantUpdate,
+    db: Session = Depends(get_db),
+):
+    """
+    Update an existing restaurant.
+
+    Only fields provided in the request body will be updated.
+    All other fields remain unchanged.
+
+    - **restaurant_id**: UUID of the restaurant to update
+    """
+    query = select(Restaurant).where(Restaurant.id == restaurant_id)
+    result = db.execute(query)
+    restaurant = result.scalar_one_or_none()
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found",
+        )
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(restaurant, field, value)
+
+    db.commit()
+    db.refresh(restaurant)
+
+    return restaurant
+
+
+@router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_restaurant(
+    restaurant_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    """
+    Delete a restaurant.
+
+    All associated menu items, reviews, and favorites are automatically
+    removed through cascade delete configuration.
+
+    - **restaurant_id**: UUID of the restaurant to delete
+    """
+    query = select(Restaurant).where(Restaurant.id == restaurant_id)
+    result = db.execute(query)
+    restaurant = result.scalar_one_or_none()
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found",
+        )
+
+    db.delete(restaurant)
+    db.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
