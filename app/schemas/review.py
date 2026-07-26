@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ReviewCreate(BaseModel):
     restaurant_id: uuid.UUID
-    user_id: uuid.UUID
     rating: int = Field(ge=1, le=5)
     comment: Optional[str] = Field(default=None, max_length=1000)
 

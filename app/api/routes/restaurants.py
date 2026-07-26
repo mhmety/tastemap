@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.api.deps import CurrentAdmin
 from app.db.session import get_db
 from app.models.menu_item import MenuItem
 from app.models.restaurant import Restaurant
@@ -27,7 +28,7 @@ def list_restaurants(
     db: Session = Depends(get_db),
 ):
     """
-    List restaurants with optional filters.
+    List restaurants with optional filters (public endpoint).
 
     - **city**: Filter restaurants located in the given city.
     - **district**: Filter restaurants located in the given district.
@@ -56,7 +57,7 @@ def get_restaurant_detail(
     db: Session = Depends(get_db),
 ):
     """
-    Get detailed information about a restaurant.
+    Get detailed information about a restaurant (public endpoint).
 
     - **restaurant_id**: UUID of the restaurant to retrieve.
 
@@ -113,10 +114,14 @@ def get_restaurant_detail(
 @router.post("", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED)
 def create_restaurant(
     data: RestaurantCreate,
+    _admin: CurrentAdmin,
     db: Session = Depends(get_db),
 ):
     """
-    Create a new restaurant.
+    Create a new restaurant (admin only).
+
+    Requires admin privileges. Unauthenticated requests return 401;
+    non-admin authenticated requests return 403.
 
     - **name**: Restaurant name (required, 1-255 characters)
     - **city**: City where the restaurant is located (required, 1-100 characters)
@@ -146,10 +151,11 @@ def create_restaurant(
 def update_restaurant(
     restaurant_id: uuid.UUID,
     data: RestaurantUpdate,
+    _admin: CurrentAdmin,
     db: Session = Depends(get_db),
 ):
     """
-    Update an existing restaurant.
+    Update an existing restaurant (admin only).
 
     Only fields provided in the request body will be updated.
     All other fields remain unchanged.
@@ -179,10 +185,11 @@ def update_restaurant(
 @router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_restaurant(
     restaurant_id: uuid.UUID,
+    _admin: CurrentAdmin,
     db: Session = Depends(get_db),
 ):
     """
-    Delete a restaurant.
+    Delete a restaurant (admin only).
 
     All associated menu items, reviews, and favorites are automatically
     removed through cascade delete configuration.

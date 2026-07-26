@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.api.deps import CurrentUser
 from app.db.session import get_db
 from app.models.restaurant import Restaurant
 from app.models.review import Review
-from app.models.user import User
 from app.schemas.review import (
     ReviewCreate,
     ReviewResponse,
@@ -21,13 +21,17 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 @router.post("", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 def create_review(
     data: ReviewCreate,
+    current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
     """
-    Create a new review for a restaurant by a user.
+    Create a new review for a restaurant as the currently authenticated user.
+
+    Requires a valid logged-in user. The review's author is automatically set
+    to the JWT-authorized user; the client cannot submit a user_id in the
+    request body.
 
     - **restaurant_id**: UUID of the restaurant being reviewed. Must exist.
-    - **user_id**: UUID of the user writing the review. Must exist.
     - **rating**: Integer rating from 1 to 5 (inclusive).
     - **comment**: Optional text comment (max 1000 characters).
 
@@ -45,19 +49,9 @@ def create_review(
             detail="Restaurant does not exist",
         )
 
-    user_exists = db.execute(
-        select(User).where(User.id == data.user_id)
-    ).scalar_one_or_none()
-
-    if user_exists is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User does not exist",
-        )
-
     duplicate = db.execute(
         select(Review).where(
-            Review.user_id == data.user_id,
+            Review.user_id == current_user.id,
             Review.restaurant_id == data.restaurant_id,
         )
     ).scalar_one_or_none()
@@ -65,12 +59,12 @@ def create_review(
     if duplicate is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User has already reviewed this restaurant",
+            detail="You have already reviewed this restaurant",
         )
 
     review = Review(
         restaurant_id=data.restaurant_id,
-        user_id=data.user_id,
+        user_id=current_user.id,
         rating=data.rating,
         comment=data.comment,
     )
@@ -88,7 +82,7 @@ def get_review(
     db: Session = Depends(get_db),
 ):
     """
-    Retrieve a single review by its UUID.
+    Retrieve a single review by its UUID (public, no authentication required).
 
     - **review_id**: UUID of the review to fetch.
     """
@@ -109,13 +103,15 @@ def get_review(
 def update_review(
     review_id: uuid.UUID,
     data: ReviewUpdate,
+    current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
     """
     Update an existing review.
 
-    Only the rating and/or comment may be updated. Fields that are
-    not provided in the request body remain unchanged.
+    Only the original review author OR an admin may update a review.
+    Only the rating and/or comment may be updated. Fields that are not
+    provided in the request body remain unchanged.
 
     - **review_id**: UUID of the review to update.
     """
@@ -127,6 +123,12 @@ def update_review(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Review not found",
+        )
+
+    if review.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to update this review",
         )
 
     update_data = data.model_dump(exclude_unset=True)
@@ -142,10 +144,13 @@ def update_review(
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_review(
     review_id: uuid.UUID,
+    current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
     """
     Delete a review.
+
+    Only the original review author OR an admin may delete a review.
 
     - **review_id**: UUID of the review to delete.
     """
@@ -157,6 +162,12 @@ def delete_review(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Review not found",
+        )
+
+    if review.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to delete this review",
         )
 
     db.delete(review)
