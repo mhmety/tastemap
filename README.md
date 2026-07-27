@@ -1,73 +1,22 @@
 # 🍽️ TasteMap
 
-**Yemeği keşfet. Restoranı değil.**
-
-TasteMap, kullanıcıların restoran isimleri yerine menüde bulunan yemekleri arayarak yeni mekanlar keşfetmesini amaçlayan bir SaaS uygulamasıdır.
-
-## 🚀 Proje Durumu
-
-🟢 Backend geliştirme süreci büyük ölçüde tamamlandı.
-
-Şu anda geliştirilen özellikler:
-
-- JWT Authentication
-- Kullanıcı & Admin Yetkilendirme
-- Restoran Yönetimi
-- Menü Yönetimi
-- Yorum Sistemi
-- Favoriler
-- PostgreSQL Veritabanı
-- Docker ile geliştirme ortamı
-
-Devam eden geliştirmeler:
-
-- Yemek bazlı arama
-- Gelişmiş filtreleme
-- Harita entegrasyonu
-- Frontend geliştirmesi
-
----
-
-## 🛠️ Kullanılan Teknolojiler
-
-- Python
-- FastAPI
-- PostgreSQL
-- SQLAlchemy
-- Alembic
-- Docker
-
----
-
-## ▶️ Projeyi Çalıştırma
-
-```bash
-docker compose up --build
-```
-
-Swagger:
-
-```
-http://localhost:8000/docs
-```
-
----
-
-## 🎯 Amaç
-
-TasteMap, restoran aramak yerine doğrudan yemek aramayı mümkün kılarak kullanıcıların istedikleri yemeği sunan mekanları daha kolay keşfetmesini hedefler.
-
-# 🍽️ TasteMap
-
-**Discover food. Not restaurants.**
+> **Discover food. Not restaurants.**
 
 TasteMap is a SaaS application that helps users discover restaurants by searching for menu items instead of restaurant names.
 
-## 🚀 Project Status
+---
 
-🟢 Backend development is almost complete.
+# 🇹🇷 Türkçe
 
-Implemented features:
+## 📌 Proje Hakkında
+
+TasteMap, kullanıcıların restoran ismi yerine yemek arayarak yeni mekanlar keşfetmesini amaçlayan modern bir restoran keşif platformudur.
+
+## 🚀 Durum
+
+Backend geliştirme süreci büyük ölçüde tamamlandı.
+
+### ✅ Tamamlanan Özellikler
 
 - JWT Authentication
 - User & Admin Authorization
@@ -75,19 +24,57 @@ Implemented features:
 - Menu Management
 - Review System
 - Favorites
+- Search & Filtering
+- Pagination & Sorting
 - PostgreSQL Database
+- SQLAlchemy ORM
+- Alembic Migrations
 - Dockerized Development Environment
+- Swagger/OpenAPI Documentation
 
-Currently in progress:
+### 🚧 Devam Eden Geliştirmeler
 
-- Search by menu items
-- Advanced filtering
-- Maps integration
-- Frontend development
+- Maps Integration
+- Recommendation System
+- Frontend (React)
 
 ---
 
-## 🛠️ Tech Stack
+# 🇬🇧 English
+
+## 📌 About
+
+TasteMap is a modern restaurant discovery platform that lets users search for food instead of restaurant names.
+
+## 🚀 Status
+
+Backend development is almost complete.
+
+### ✅ Implemented Features
+
+- JWT Authentication
+- User & Admin Authorization
+- Restaurant Management
+- Menu Management
+- Review System
+- Favorites
+- Search & Filtering
+- Pagination & Sorting
+- PostgreSQL Database
+- SQLAlchemy ORM
+- Alembic Migrations
+- Dockerized Development Environment
+- Swagger/OpenAPI Documentation
+
+### 🚧 In Progress
+
+- Maps Integration
+- Recommendation System
+- React Frontend
+
+---
+
+# 🛠 Tech Stack
 
 - Python
 - FastAPI
@@ -98,13 +85,13 @@ Currently in progress:
 
 ---
 
-## ▶️ Getting Started
+# ▶️ Run Locally
 
 ```bash
 docker compose up --build
 ```
 
-Swagger UI:
+Swagger UI
 
 ```
 http://localhost:8000/docs
@@ -112,6 +99,6 @@ http://localhost:8000/docs
 
 ---
 
-## 🎯 Goal
+# 🎯 Vision
 
-TasteMap aims to make restaurant discovery easier by allowing users to search for food instead of restaurant names.
+TasteMap aims to improve restaurant discovery by helping users find the food they want first, then the restaurants that serve it.
