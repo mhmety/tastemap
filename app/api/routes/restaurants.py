@@ -1,6 +1,6 @@
 
 import uuid
-from typing import Annotated, List, Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, or_, select
@@ -106,7 +106,17 @@ def _serialize_restaurant_list_item(
     )
 
 
-@router.get("", response_model=RestaurantListResponse)
+@router.get(
+    "",
+    response_model=RestaurantListResponse,
+    summary="List restaurants",
+    description="Retrieve a paginated list of restaurants with optional search, filtering, and sorting.",
+    response_description="A paginated list of restaurants.",
+    responses={
+        200: {"description": "Restaurants retrieved successfully."},
+        422: {"description": "Invalid query parameter values."},
+    },
+)
 def list_restaurants(
     search: Annotated[
         Optional[str],
@@ -193,7 +203,18 @@ def list_restaurants(
     )
 
 
-@router.get("/{restaurant_id}", response_model=RestaurantDetailResponse)
+@router.get(
+    "/{restaurant_id}",
+    response_model=RestaurantDetailResponse,
+    summary="Get restaurant details",
+    description="Retrieve detailed information for a single restaurant, including menu items and reviews.",
+    response_description="Detailed restaurant information.",
+    responses={
+        200: {"description": "Restaurant details retrieved successfully."},
+        404: {"description": "Restaurant not found."},
+        422: {"description": "Invalid restaurant identifier."},
+    },
+)
 def get_restaurant_detail(
     restaurant_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -253,7 +274,20 @@ def get_restaurant_detail(
     }
 
 
-@router.post("", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=RestaurantResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a restaurant",
+    description="Create a new restaurant. This endpoint requires admin privileges.",
+    response_description="The newly created restaurant.",
+    responses={
+        201: {"description": "Restaurant created successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "Admin privileges are required."},
+        422: {"description": "Validation error in the submitted payload."},
+    },
+)
 def create_restaurant(
     data: RestaurantCreate,
     _admin: CurrentAdmin,
@@ -289,7 +323,20 @@ def create_restaurant(
     return restaurant
 
 
-@router.put("/{restaurant_id}", response_model=RestaurantResponse)
+@router.put(
+    "/{restaurant_id}",
+    response_model=RestaurantResponse,
+    summary="Update a restaurant",
+    description="Update an existing restaurant. This endpoint requires admin privileges.",
+    response_description="The updated restaurant.",
+    responses={
+        200: {"description": "Restaurant updated successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "Admin privileges are required."},
+        404: {"description": "Restaurant not found."},
+        422: {"description": "Validation error in the request."},
+    },
+)
 def update_restaurant(
     restaurant_id: uuid.UUID,
     data: RestaurantUpdate,
@@ -324,7 +371,20 @@ def update_restaurant(
     return restaurant
 
 
-@router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{restaurant_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a restaurant",
+    description="Delete an existing restaurant. This endpoint requires admin privileges.",
+    response_description="Restaurant deleted successfully.",
+    responses={
+        204: {"description": "Restaurant deleted successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "Admin privileges are required."},
+        404: {"description": "Restaurant not found."},
+        422: {"description": "Invalid restaurant identifier."},
+    },
+)
 def delete_restaurant(
     restaurant_id: uuid.UUID,
     _admin: CurrentAdmin,

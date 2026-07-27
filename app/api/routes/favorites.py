@@ -15,7 +15,20 @@ from app.schemas.favorite import FavoriteCreate, FavoriteResponse
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
 
-@router.post("", response_model=FavoriteResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=FavoriteResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a favorite",
+    description="Add a restaurant to the authenticated user's favorites.",
+    response_description="The newly created favorite entry.",
+    responses={
+        201: {"description": "Favorite created successfully."},
+        400: {"description": "Restaurant does not exist or is already favorited."},
+        401: {"description": "Authentication required."},
+        422: {"description": "Validation error in the submitted payload."},
+    },
+)
 def create_favorite(
     data: FavoriteCreate,
     current_user: CurrentUser,
@@ -66,7 +79,17 @@ def create_favorite(
     return favorite
 
 
-@router.get("/me", response_model=List[FavoriteResponse])
+@router.get(
+    "/me",
+    response_model=List[FavoriteResponse],
+    summary="List my favorites",
+    description="Retrieve the authenticated user's favorite restaurants.",
+    response_description="A list of favorite entries for the current user.",
+    responses={
+        200: {"description": "Favorites retrieved successfully."},
+        401: {"description": "Authentication required."},
+    },
+)
 def list_my_favorites(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
@@ -82,7 +105,20 @@ def list_my_favorites(
     return list(favorites)
 
 
-@router.delete("/{favorite_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{favorite_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a favorite",
+    description="Remove a favorite entry owned by the current user, or by an admin.",
+    response_description="Favorite deleted successfully.",
+    responses={
+        204: {"description": "Favorite deleted successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "The current user is not allowed to delete this favorite."},
+        404: {"description": "Favorite not found."},
+        422: {"description": "Invalid favorite identifier."},
+    },
+)
 def delete_favorite(
     favorite_id: uuid.UUID,
     current_user: CurrentUser,

@@ -15,7 +15,19 @@ from app.schemas.user import UserCreate, UserResponse, TokenResponse
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a user",
+    description="Create a new user account with a unique username and email address.",
+    response_description="The newly created user account.",
+    responses={
+        201: {"description": "User account created successfully."},
+        409: {"description": "Username or email is already registered."},
+        422: {"description": "Validation error in the submitted payload."},
+    },
+)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user account.
@@ -59,7 +71,20 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    summary="Log in a user",
+    description=(
+        "Authenticate a user using the OAuth2 password flow and return JWT access and refresh tokens."
+    ),
+    response_description="JWT access and refresh tokens.",
+    responses={
+        200: {"description": "Login successful."},
+        401: {"description": "Invalid credentials or inactive user account."},
+        422: {"description": "Validation error in submitted form data."},
+    },
+)
 def login_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),

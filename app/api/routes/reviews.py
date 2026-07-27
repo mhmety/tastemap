@@ -18,7 +18,20 @@ from app.schemas.review import (
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
-@router.post("", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a review",
+    description="Create a review for a restaurant as the currently authenticated user.",
+    response_description="The newly created review.",
+    responses={
+        201: {"description": "Review created successfully."},
+        400: {"description": "Restaurant does not exist or the user already reviewed it."},
+        401: {"description": "Authentication required."},
+        422: {"description": "Validation error in the submitted payload."},
+    },
+)
 def create_review(
     data: ReviewCreate,
     current_user: CurrentUser,
@@ -76,7 +89,18 @@ def create_review(
     return review
 
 
-@router.get("/{review_id}", response_model=ReviewResponse)
+@router.get(
+    "/{review_id}",
+    response_model=ReviewResponse,
+    summary="Get a review",
+    description="Retrieve a single review by its UUID.",
+    response_description="The requested review.",
+    responses={
+        200: {"description": "Review retrieved successfully."},
+        404: {"description": "Review not found."},
+        422: {"description": "Invalid review identifier."},
+    },
+)
 def get_review(
     review_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -99,7 +123,20 @@ def get_review(
     return review
 
 
-@router.put("/{review_id}", response_model=ReviewResponse)
+@router.put(
+    "/{review_id}",
+    response_model=ReviewResponse,
+    summary="Update a review",
+    description="Update a review owned by the current user, or by an admin.",
+    response_description="The updated review.",
+    responses={
+        200: {"description": "Review updated successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "The current user is not allowed to update this review."},
+        404: {"description": "Review not found."},
+        422: {"description": "Validation error in the request."},
+    },
+)
 def update_review(
     review_id: uuid.UUID,
     data: ReviewUpdate,
@@ -141,7 +178,20 @@ def update_review(
     return review
 
 
-@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{review_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a review",
+    description="Delete a review owned by the current user, or by an admin.",
+    response_description="Review deleted successfully.",
+    responses={
+        204: {"description": "Review deleted successfully."},
+        401: {"description": "Authentication required."},
+        403: {"description": "The current user is not allowed to delete this review."},
+        404: {"description": "Review not found."},
+        422: {"description": "Invalid review identifier."},
+    },
+)
 def delete_review(
     review_id: uuid.UUID,
     current_user: CurrentUser,

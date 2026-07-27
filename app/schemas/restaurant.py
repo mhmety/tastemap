@@ -16,6 +16,21 @@ class RestaurantCreate(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=50)
     description: Optional[str] = Field(default=None, max_length=1000)
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "name": "Burger House",
+                "city": "Ankara",
+                "district": "Cankaya",
+                "latitude": 39.9334,
+                "longitude": 32.8597,
+                "website": "https://burgerhouse.com",
+                "phone": "+90 312 123 45 67",
+                "description": "Casual burger restaurant with signature house sauces.",
+            }
+        }
+    )
+
 
 class RestaurantUpdate(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1, max_length=255)
@@ -26,6 +41,15 @@ class RestaurantUpdate(BaseModel):
     website: Optional[str] = Field(default=None, max_length=255)
     phone: Optional[str] = Field(default=None, max_length=50)
     description: Optional[str] = Field(default=None, max_length=1000)
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "phone": "+90 312 987 65 43",
+                "description": "Updated description for the restaurant profile.",
+            }
+        }
+    )
 
 
 class RestaurantResponse(BaseModel):
@@ -42,7 +66,25 @@ class RestaurantResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": "4b4733c3-1136-4105-a957-dd4ed1cab0e2",
+                "name": "Burger House",
+                "city": "Ankara",
+                "district": "Cankaya",
+                "latitude": 39.9334,
+                "longitude": 32.8597,
+                "website": "https://burgerhouse.com",
+                "phone": "+90 312 123 45 67",
+                "description": "Casual burger restaurant with signature house sauces.",
+                "average_rating": 4.6,
+                "created_at": "2026-07-27T10:00:00Z",
+                "updated_at": "2026-07-27T10:00:00Z",
+            }
+        },
+    )
 
 
 class RestaurantListResponse(BaseModel):
@@ -50,6 +92,32 @@ class RestaurantListResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "items": [
+                    {
+                        "id": "4b4733c3-1136-4105-a957-dd4ed1cab0e2",
+                        "name": "Burger House",
+                        "city": "Ankara",
+                        "district": "Cankaya",
+                        "latitude": 39.9334,
+                        "longitude": 32.8597,
+                        "website": "https://burgerhouse.com",
+                        "phone": "+90 312 123 45 67",
+                        "description": "Casual burger restaurant with signature house sauces.",
+                        "average_rating": 4.6,
+                        "created_at": "2026-07-27T10:00:00Z",
+                        "updated_at": "2026-07-27T10:00:00Z",
+                    }
+                ],
+                "total": 124,
+                "limit": 20,
+                "offset": 40,
+            }
+        }
+    )
 
 
 class MenuItemResponse(BaseModel):
