@@ -1,18 +1,20 @@
 
 import uuid
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import CurrentAdmin
 from app.db.session import get_db
 from app.models.menu_item import MenuItem
 from app.models.restaurant import Restaurant
+from app.models.review import Review
 from app.schemas.restaurant import (
     RestaurantCreate,
     RestaurantDetailResponse,
+    RestaurantListResponse,
     RestaurantResponse,
     RestaurantUpdate,
 )
@@ -20,21 +22,37 @@ from app.schemas.restaurant import (
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 
-@router.get("", response_model=List[RestaurantResponse])
-def list_restaurants(
-    city: Annotated[Optional[str], Query(description="Filter by city")] = None,
-    district: Annotated[Optional[str], Query(description="Filter by district")] = None,
-    category: Annotated[Optional[str], Query(description="Filter by menu item category")] = None,
-    db: Session = Depends(get_db),
-):
-    """
-    List restaurants with optional filters (public endpoint).
+def _build_average_rating_subquery():
+    return (
+        select(
+            Review.restaurant_id.label("restaurant_id"),
+            func.avg(Review.rating).label("average_rating"),
+        )
+        .group_by(Review.restaurant_id)
+        .subquery()
+    )
 
-    - **city**: Filter restaurants located in the given city.
-    - **district**: Filter restaurants located in the given district.
-    - **category**: Filter restaurants that have at least one menu item in this category.
-    """
-    query = select(Restaurant)
+
+def _apply_restaurant_list_filters(
+    query,
+    average_rating_subquery,
+    search: Optional[str],
+    city: Optional[str],
+    district: Optional[str],
+    category: Optional[str],
+    minimum_rating: Optional[float],
+):
+    search_term = search.strip() if search else None
+    if search_term:
+        pattern = f"%{search_term}%"
+        query = query.where(
+            or_(
+                Restaurant.name.ilike(pattern),
+                Restaurant.description.ilike(pattern),
+                # Use relationship filters so matching menu items do not duplicate restaurants.
+                Restaurant.menu_items.any(MenuItem.name.ilike(pattern)),
+            )
+        )
 
     if city is not None:
         query = query.where(Restaurant.city == city)
@@ -43,12 +61,136 @@ def list_restaurants(
         query = query.where(Restaurant.district == district)
 
     if category is not None:
-        query = query.join(Restaurant.menu_items).where(MenuItem.category == category)
-        query = query.distinct()
+        query = query.where(Restaurant.menu_items.any(MenuItem.category == category))
 
-    result = db.execute(query)
-    restaurants = result.scalars().all()
-    return list(restaurants)
+    if minimum_rating is not None:
+        query = query.where(
+            average_rating_subquery.c.average_rating >= minimum_rating
+        )
+
+    return query
+
+
+def _apply_restaurant_list_sorting(query, average_rating_subquery, sort: str):
+    if sort == "name":
+        return query.order_by(Restaurant.name.asc(), Restaurant.created_at.desc())
+
+    if sort == "rating":
+        return query.order_by(
+            average_rating_subquery.c.average_rating.desc().nullslast(),
+            Restaurant.created_at.desc(),
+        )
+
+    return query.order_by(Restaurant.created_at.desc())
+
+
+def _serialize_restaurant_list_item(
+    restaurant: Restaurant,
+    average_rating: Optional[float],
+) -> RestaurantResponse:
+    return RestaurantResponse.model_validate(
+        {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "city": restaurant.city,
+            "district": restaurant.district,
+            "latitude": restaurant.latitude,
+            "longitude": restaurant.longitude,
+            "website": restaurant.website,
+            "phone": restaurant.phone,
+            "description": restaurant.description,
+            "average_rating": average_rating,
+            "created_at": restaurant.created_at,
+            "updated_at": restaurant.updated_at,
+        }
+    )
+
+
+@router.get("", response_model=RestaurantListResponse)
+def list_restaurants(
+    search: Annotated[
+        Optional[str],
+        Query(description="Search by restaurant name, description, or menu item name"),
+    ] = None,
+    city: Annotated[Optional[str], Query(description="Filter by city")] = None,
+    district: Annotated[Optional[str], Query(description="Filter by district")] = None,
+    category: Annotated[Optional[str], Query(description="Filter by menu item category")] = None,
+    minimum_rating: Annotated[
+        Optional[float],
+        Query(ge=1, le=5, description="Filter by minimum average review rating"),
+    ] = None,
+    sort: Annotated[
+        Literal["name", "rating", "created_at"],
+        Query(description="Sort field"),
+    ] = "created_at",
+    limit: Annotated[
+        int,
+        Query(ge=1, le=100, description="Maximum number of restaurants to return"),
+    ] = 20,
+    offset: Annotated[
+        int,
+        Query(ge=0, description="Number of restaurants to skip"),
+    ] = 0,
+    db: Session = Depends(get_db),
+):
+    """
+    List restaurants with optional search, filters, sorting, and pagination
+    (public endpoint).
+
+    - **search**: Case-insensitive search on restaurant name, description, and menu item name.
+    - **city**: Filter restaurants located in the given city.
+    - **district**: Filter restaurants located in the given district.
+    - **category**: Filter restaurants that have at least one menu item in this category.
+    - **minimum_rating**: Filter restaurants whose average review rating is at least this value.
+    - **sort**: Sort by `name`, `rating`, or `created_at`.
+    - **limit / offset**: Pagination controls.
+    """
+    average_rating_subquery = _build_average_rating_subquery()
+    average_rating_column = average_rating_subquery.c.average_rating.label("average_rating")
+    restaurant_query = (
+        select(Restaurant, average_rating_column)
+        .outerjoin(
+            average_rating_subquery,
+            average_rating_subquery.c.restaurant_id == Restaurant.id,
+        )
+    )
+
+    restaurant_query = _apply_restaurant_list_filters(
+        restaurant_query,
+        average_rating_subquery,
+        search,
+        city,
+        district,
+        category,
+        minimum_rating,
+    )
+    restaurant_query = _apply_restaurant_list_sorting(
+        restaurant_query,
+        average_rating_subquery,
+        sort,
+    )
+
+    total_query = select(func.count()).select_from(
+        restaurant_query.order_by(None).subquery()
+    )
+    total = db.execute(total_query).scalar_one()
+
+    restaurant_query = restaurant_query.limit(limit).offset(offset)
+
+    result = db.execute(restaurant_query)
+    rows = result.all()
+
+    items = [
+        _serialize_restaurant_list_item(restaurant, average_rating)
+        for restaurant, average_rating in rows
+    ]
+
+    return RestaurantListResponse(
+        items=items,
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/{restaurant_id}", response_model=RestaurantDetailResponse)

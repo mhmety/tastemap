@@ -38,10 +38,18 @@ class RestaurantResponse(BaseModel):
     website: Optional[str] = None
     phone: Optional[str] = None
     description: Optional[str] = None
+    average_rating: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RestaurantListResponse(BaseModel):
+    items: List[RestaurantResponse]
+    total: int
+    limit: int
+    offset: int
 
 
 class MenuItemResponse(BaseModel):
