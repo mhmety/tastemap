@@ -2,11 +2,13 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FavoriteCreate(BaseModel):
-    restaurant_id: uuid.UUID
+    restaurant_id: uuid.UUID = Field(
+        description="Identifier of the restaurant to add to favorites.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -18,10 +20,10 @@ class FavoriteCreate(BaseModel):
 
 
 class FavoriteResponse(BaseModel):
-    id: uuid.UUID
-    user_id: uuid.UUID
-    restaurant_id: uuid.UUID
-    created_at: datetime
+    id: uuid.UUID = Field(description="Unique identifier of the favorite entry.")
+    user_id: uuid.UUID = Field(description="Identifier of the user who owns the favorite entry.")
+    restaurant_id: uuid.UUID = Field(description="Identifier of the favorited restaurant.")
+    created_at: datetime = Field(description="Timestamp when the favorite entry was created.")
 
     model_config = ConfigDict(
         from_attributes=True,

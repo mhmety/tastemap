@@ -1,10 +1,11 @@
 
 import uuid
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.sql.selectable import Subquery
 
 from app.api.deps import CurrentAdmin
 from app.db.session import get_db
@@ -22,7 +23,7 @@ from app.schemas.restaurant import (
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 
-def _build_average_rating_subquery():
+def _build_average_rating_subquery() -> Subquery:
     return (
         select(
             Review.restaurant_id.label("restaurant_id"),
@@ -34,14 +35,14 @@ def _build_average_rating_subquery():
 
 
 def _apply_restaurant_list_filters(
-    query,
-    average_rating_subquery,
+    query: Any,
+    average_rating_subquery: Subquery,
     search: Optional[str],
     city: Optional[str],
     district: Optional[str],
     category: Optional[str],
     minimum_rating: Optional[float],
-):
+) -> Any:
     search_term = search.strip() if search else None
     if search_term:
         pattern = f"%{search_term}%"
@@ -71,7 +72,11 @@ def _apply_restaurant_list_filters(
     return query
 
 
-def _apply_restaurant_list_sorting(query, average_rating_subquery, sort: str):
+def _apply_restaurant_list_sorting(
+    query: Any,
+    average_rating_subquery: Subquery,
+    sort: Literal["name", "rating", "created_at"],
+) -> Any:
     if sort == "name":
         return query.order_by(Restaurant.name.asc(), Restaurant.created_at.desc())
 
@@ -142,7 +147,7 @@ def list_restaurants(
         Query(ge=0, description="Number of restaurants to skip"),
     ] = 0,
     db: Session = Depends(get_db),
-):
+) -> RestaurantListResponse:
     """
     List restaurants with optional search, filters, sorting, and pagination
     (public endpoint).
@@ -216,9 +221,12 @@ def list_restaurants(
     },
 )
 def get_restaurant_detail(
-    restaurant_id: uuid.UUID,
+    restaurant_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the restaurant to retrieve."),
+    ],
     db: Session = Depends(get_db),
-):
+) -> RestaurantDetailResponse:
     """
     Get detailed information about a restaurant (public endpoint).
 
@@ -255,23 +263,25 @@ def get_restaurant_detail(
     else:
         average_rating = None
 
-    return {
-        "id": restaurant.id,
-        "name": restaurant.name,
-        "city": restaurant.city,
-        "district": restaurant.district,
-        "latitude": restaurant.latitude,
-        "longitude": restaurant.longitude,
-        "website": restaurant.website,
-        "phone": restaurant.phone,
-        "description": restaurant.description,
-        "created_at": restaurant.created_at,
-        "updated_at": restaurant.updated_at,
-        "average_rating": average_rating,
-        "review_count": review_count,
-        "menu_items": list(restaurant.menu_items),
-        "reviews": list(reviews),
-    }
+    return RestaurantDetailResponse.model_validate(
+        {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "city": restaurant.city,
+            "district": restaurant.district,
+            "latitude": restaurant.latitude,
+            "longitude": restaurant.longitude,
+            "website": restaurant.website,
+            "phone": restaurant.phone,
+            "description": restaurant.description,
+            "created_at": restaurant.created_at,
+            "updated_at": restaurant.updated_at,
+            "average_rating": average_rating,
+            "review_count": review_count,
+            "menu_items": list(restaurant.menu_items),
+            "reviews": list(reviews),
+        }
+    )
 
 
 @router.post(
@@ -292,7 +302,7 @@ def create_restaurant(
     data: RestaurantCreate,
     _admin: CurrentAdmin,
     db: Session = Depends(get_db),
-):
+) -> Restaurant:
     """
     Create a new restaurant (admin only).
 
@@ -338,11 +348,14 @@ def create_restaurant(
     },
 )
 def update_restaurant(
-    restaurant_id: uuid.UUID,
+    restaurant_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the restaurant to update."),
+    ],
     data: RestaurantUpdate,
     _admin: CurrentAdmin,
     db: Session = Depends(get_db),
-):
+) -> Restaurant:
     """
     Update an existing restaurant (admin only).
 
@@ -386,10 +399,13 @@ def update_restaurant(
     },
 )
 def delete_restaurant(
-    restaurant_id: uuid.UUID,
+    restaurant_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the restaurant to delete."),
+    ],
     _admin: CurrentAdmin,
     db: Session = Depends(get_db),
-):
+) -> Response:
     """
     Delete a restaurant (admin only).
 

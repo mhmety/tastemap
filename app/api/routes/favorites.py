@@ -1,8 +1,8 @@
 
 import uuid
-from typing import List
+from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -23,8 +23,27 @@ router = APIRouter(prefix="/favorites", tags=["favorites"])
     description="Add a restaurant to the authenticated user's favorites.",
     response_description="The newly created favorite entry.",
     responses={
-        201: {"description": "Favorite created successfully."},
-        400: {"description": "Restaurant does not exist or is already favorited."},
+        201: {
+            "description": "Favorite created successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "9c3a2222-aaaa-4f52-bbbb-1234567890ab",
+                        "user_id": "f2dcda87-75f7-450d-8e29-1f201cd48658",
+                        "restaurant_id": "4b4733c3-1136-4105-a957-dd4ed1cab0e2",
+                        "created_at": "2026-07-27T10:00:00Z",
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Restaurant does not exist or is already favorited.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Restaurant is already in your favorites"}
+                }
+            },
+        },
         401: {"description": "Authentication required."},
         422: {"description": "Validation error in the submitted payload."},
     },
@@ -33,7 +52,7 @@ def create_favorite(
     data: FavoriteCreate,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> Favorite:
     """
     Add a restaurant to the currently authenticated user's favorites.
 
@@ -93,7 +112,7 @@ def create_favorite(
 def list_my_favorites(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> List[Favorite]:
     """
     List the currently authenticated user's favorite restaurants.
 
@@ -120,10 +139,13 @@ def list_my_favorites(
     },
 )
 def delete_favorite(
-    favorite_id: uuid.UUID,
+    favorite_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the favorite entry to delete."),
+    ],
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> Response:
     """
     Remove a restaurant from the authenticated user's favorites by favorite ID.
 

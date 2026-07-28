@@ -7,9 +7,19 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ReviewCreate(BaseModel):
-    restaurant_id: uuid.UUID
-    rating: int = Field(ge=1, le=5)
-    comment: Optional[str] = Field(default=None, max_length=1000)
+    restaurant_id: uuid.UUID = Field(
+        description="Identifier of the restaurant being reviewed.",
+    )
+    rating: int = Field(
+        ge=1,
+        le=5,
+        description="Numeric rating from 1 to 5.",
+    )
+    comment: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Optional written review comment.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -23,8 +33,17 @@ class ReviewCreate(BaseModel):
 
 
 class ReviewUpdate(BaseModel):
-    rating: Optional[int] = Field(default=None, ge=1, le=5)
-    comment: Optional[str] = Field(default=None, max_length=1000)
+    rating: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=5,
+        description="Updated numeric rating from 1 to 5.",
+    )
+    comment: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Updated written review comment.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -37,13 +56,16 @@ class ReviewUpdate(BaseModel):
 
 
 class ReviewResponse(BaseModel):
-    id: uuid.UUID
-    restaurant_id: uuid.UUID
-    user_id: uuid.UUID
-    rating: int
-    comment: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    id: uuid.UUID = Field(description="Unique identifier of the review.")
+    restaurant_id: uuid.UUID = Field(description="Identifier of the reviewed restaurant.")
+    user_id: uuid.UUID = Field(description="Identifier of the user who created the review.")
+    rating: int = Field(description="Numeric rating from 1 to 5.")
+    comment: Optional[str] = Field(
+        default=None,
+        description="Optional written review comment.",
+    )
+    created_at: datetime = Field(description="Timestamp when the review was created.")
+    updated_at: datetime = Field(description="Timestamp when the review was last updated.")
 
     model_config = ConfigDict(
         from_attributes=True,

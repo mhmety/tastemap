@@ -7,9 +7,19 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreate(BaseModel):
-    username: str = Field(min_length=3, max_length=50)
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    username: str = Field(
+        min_length=3,
+        max_length=50,
+        description="Unique username for the new account.",
+    )
+    email: EmailStr = Field(
+        description="Email address used for authentication and account communication.",
+    )
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+        description="Plain-text password that will be hashed before storage.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -23,8 +33,14 @@ class UserCreate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    email: EmailStr = Field(
+        description="Registered email address used to sign in.",
+    )
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+        description="Plain-text password for the account.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -37,8 +53,14 @@ class UserLogin(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    email: EmailStr = Field(
+        description="Registered email address used to sign in.",
+    )
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+        description="Plain-text password for the account.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -51,7 +73,10 @@ class LoginRequest(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: Optional[uuid.UUID] = None
+    user_id: Optional[uuid.UUID] = Field(
+        default=None,
+        description="Authenticated user identifier extracted from the JWT subject claim.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -63,8 +88,13 @@ class TokenData(BaseModel):
 
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+    access_token: str = Field(
+        description="JWT access token used for authenticated API requests.",
+    )
+    token_type: str = Field(
+        default="bearer",
+        description="Authentication scheme type for the returned token.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -77,12 +107,12 @@ class Token(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: uuid.UUID
-    username: str
-    email: EmailStr
-    is_active: bool
-    is_admin: bool
-    created_at: datetime
+    id: uuid.UUID = Field(description="Unique identifier of the user account.")
+    username: str = Field(description="Unique username of the account.")
+    email: EmailStr = Field(description="Email address associated with the account.")
+    is_active: bool = Field(description="Whether the user account is currently active.")
+    is_admin: bool = Field(description="Whether the user has administrator privileges.")
+    created_at: datetime = Field(description="Timestamp when the user account was created.")
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -100,9 +130,16 @@ class UserResponse(BaseModel):
 
 
 class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+    access_token: str = Field(
+        description="JWT access token used in the Authorization header.",
+    )
+    refresh_token: str = Field(
+        description="JWT refresh token that can be used for future token renewal flows.",
+    )
+    token_type: str = Field(
+        default="bearer",
+        description="Authentication scheme type for the returned tokens.",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={

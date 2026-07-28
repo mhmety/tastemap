@@ -23,12 +23,33 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     description="Create a new user account with a unique username and email address.",
     response_description="The newly created user account.",
     responses={
-        201: {"description": "User account created successfully."},
-        409: {"description": "Username or email is already registered."},
+        201: {
+            "description": "User account created successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "f2dcda87-75f7-450d-8e29-1f201cd48658",
+                        "username": "mehmetyildiz",
+                        "email": "mehmet@example.com",
+                        "is_active": True,
+                        "is_admin": False,
+                        "created_at": "2026-07-27T10:00:00Z",
+                    }
+                }
+            },
+        },
+        409: {
+            "description": "Username or email is already registered.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Email already registered"}
+                }
+            },
+        },
         422: {"description": "Validation error in the submitted payload."},
     },
 )
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
+def register_user(user: UserCreate, db: Session = Depends(get_db)) -> User:
     """
     Register a new user account.
 
@@ -80,15 +101,33 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     ),
     response_description="JWT access and refresh tokens.",
     responses={
-        200: {"description": "Login successful."},
-        401: {"description": "Invalid credentials or inactive user account."},
+        200: {
+            "description": "Login successful.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.access",
+                        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh",
+                        "token_type": "bearer",
+                    }
+                }
+            },
+        },
+        401: {
+            "description": "Invalid credentials or inactive user account.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid email or password"}
+                }
+            },
+        },
         422: {"description": "Validation error in submitted form data."},
     },
 )
 def login_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
-):
+) -> TokenResponse:
     """
     OAuth2 compatible token login.
 

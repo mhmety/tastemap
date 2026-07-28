@@ -1,7 +1,8 @@
 
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -26,8 +27,30 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
     description="Create a review for a restaurant as the currently authenticated user.",
     response_description="The newly created review.",
     responses={
-        201: {"description": "Review created successfully."},
-        400: {"description": "Restaurant does not exist or the user already reviewed it."},
+        201: {
+            "description": "Review created successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "33333333-3333-3333-3333-333333333333",
+                        "restaurant_id": "4b4733c3-1136-4105-a957-dd4ed1cab0e2",
+                        "user_id": "f2dcda87-75f7-450d-8e29-1f201cd48658",
+                        "rating": 5,
+                        "comment": "Excellent burgers and quick service.",
+                        "created_at": "2026-07-27T10:00:00Z",
+                        "updated_at": "2026-07-27T10:00:00Z",
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Restaurant does not exist or the user already reviewed it.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You have already reviewed this restaurant"}
+                }
+            },
+        },
         401: {"description": "Authentication required."},
         422: {"description": "Validation error in the submitted payload."},
     },
@@ -36,7 +59,7 @@ def create_review(
     data: ReviewCreate,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> Review:
     """
     Create a new review for a restaurant as the currently authenticated user.
 
@@ -102,9 +125,12 @@ def create_review(
     },
 )
 def get_review(
-    review_id: uuid.UUID,
+    review_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the review to retrieve."),
+    ],
     db: Session = Depends(get_db),
-):
+) -> Review:
     """
     Retrieve a single review by its UUID (public, no authentication required).
 
@@ -138,11 +164,14 @@ def get_review(
     },
 )
 def update_review(
-    review_id: uuid.UUID,
+    review_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the review to update."),
+    ],
     data: ReviewUpdate,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> Review:
     """
     Update an existing review.
 
@@ -193,10 +222,13 @@ def update_review(
     },
 )
 def delete_review(
-    review_id: uuid.UUID,
+    review_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the review to delete."),
+    ],
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-):
+) -> Response:
     """
     Delete a review.
 
