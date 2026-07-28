@@ -1,5 +1,11 @@
 # 🍽️ TasteMap
 
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+![Status](https://img.shields.io/badge/Status-Backend%20MVP-success)
+
 > **Discover food. Not restaurants.**
 
 TasteMap is a SaaS application that helps users discover restaurants by searching for menu items instead of restaurant names.
@@ -10,33 +16,34 @@ TasteMap is a SaaS application that helps users discover restaurants by searchin
 
 ## 📌 Proje Hakkında
 
-TasteMap, kullanıcıların restoran ismi yerine yemek arayarak yeni mekanlar keşfetmesini amaçlayan modern bir restoran keşif platformudur.
+TasteMap, kullanıcıların restoran ismi yerine doğrudan yemek arayarak yeni mekanlar keşfetmesini amaçlayan modern bir restoran keşif platformudur.
 
 ## 🚀 Durum
 
-Backend geliştirme süreci büyük ölçüde tamamlandı.
+🟢 **Backend (MVP) tamamlandı.**
 
 ### ✅ Tamamlanan Özellikler
 
-- JWT Authentication
-- User & Admin Authorization
-- Restaurant Management
+- JWT Authentication (OAuth2 Password Flow)
+- Role-Based Authorization (User / Admin)
+- Restaurant Management (CRUD)
 - Menu Management
 - Review System
 - Favorites
-- Search & Filtering
-- Pagination & Sorting
+- Search, Filtering & Pagination
+- Rating & Sorting
 - PostgreSQL Database
 - SQLAlchemy ORM
 - Alembic Migrations
 - Dockerized Development Environment
-- Swagger/OpenAPI Documentation
+- Swagger / OpenAPI Documentation
 
-### 🚧 Devam Eden Geliştirmeler
+### 🚧 Sonraki Adımlar
 
+- React Frontend
 - Maps Integration
 - Recommendation System
-- Frontend (React)
+- Cloud Deployment (AWS)
 
 ---
 
@@ -48,29 +55,30 @@ TasteMap is a modern restaurant discovery platform that lets users search for fo
 
 ## 🚀 Status
 
-Backend development is almost complete.
+🟢 **Backend (MVP) completed.**
 
-### ✅ Implemented Features
+### ✅ Features
 
-- JWT Authentication
-- User & Admin Authorization
-- Restaurant Management
+- JWT Authentication (OAuth2 Password Flow)
+- Role-Based Authorization (User / Admin)
+- Restaurant Management (CRUD)
 - Menu Management
 - Review System
 - Favorites
-- Search & Filtering
-- Pagination & Sorting
+- Search, Filtering & Pagination
+- Rating & Sorting
 - PostgreSQL Database
 - SQLAlchemy ORM
 - Alembic Migrations
 - Dockerized Development Environment
-- Swagger/OpenAPI Documentation
+- Swagger / OpenAPI Documentation
 
-### 🚧 In Progress
+### 🚧 Next Steps
 
+- React Frontend
 - Maps Integration
 - Recommendation System
-- React Frontend
+- Cloud Deployment (AWS)
 
 ---
 
@@ -82,6 +90,8 @@ Backend development is almost complete.
 - SQLAlchemy
 - Alembic
 - Docker
+- JWT Authentication
+- Swagger / OpenAPI
 
 ---
 
@@ -101,4 +111,4 @@ http://localhost:8000/docs
 
 # 🎯 Vision
 
-TasteMap aims to improve restaurant discovery by helping users find the food they want first, then the restaurants that serve it.
+TasteMap aims to improve restaurant discovery by helping users find food first, then the restaurants that serve it.
