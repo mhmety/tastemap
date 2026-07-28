@@ -18,6 +18,31 @@ export interface RestaurantApiItem {
   updated_at: string
 }
 
+export interface MenuItem {
+  id: string
+  name: string
+  price: number
+  category: string
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Review {
+  id: string
+  user_id: string
+  rating: number
+  comment: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface RestaurantDetailResponse extends RestaurantApiItem {
+  review_count: number
+  menu_items: MenuItem[]
+  reviews: Review[]
+}
+
 export interface PaginatedRestaurantsResponse {
   items: RestaurantApiItem[]
   total: number

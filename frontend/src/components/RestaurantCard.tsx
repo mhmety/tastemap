@@ -1,14 +1,12 @@
-import { MapPin, Star } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import type { JSX } from 'react'
+import { Link } from 'react-router-dom'
 
 import type { Restaurant } from '../types/restaurant'
+import { RatingBadge } from './RatingBadge'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
-}
-
-function formatRating(rating: number | null): string {
-  return rating === null ? 'Unrated' : `${rating.toFixed(1)} / 5`
 }
 
 export function RestaurantCard({ restaurant }: RestaurantCardProps): JSX.Element {
@@ -24,20 +22,17 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps): JSX.Element
             {restaurant.city}, {restaurant.district}
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-700">
-          <Star size={16} className="fill-current" />
-          {formatRating(restaurant.average_rating)}
-        </div>
+        <RatingBadge rating={restaurant.average_rating} />
       </div>
 
       <p className="mt-4 text-sm leading-6 text-slate-600">{description}</p>
       <div className="mt-6">
-        <button
-          type="button"
+        <Link
+          to={`/restaurants/${restaurant.id}`}
           className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition group-hover:border-orange-200 group-hover:text-orange-600"
         >
           View Details
-        </button>
+        </Link>
       </div>
     </article>
   )

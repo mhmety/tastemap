@@ -4,6 +4,7 @@ import { Layout } from '../components/Layout'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { RestaurantDetailPage } from '../pages/RestaurantDetailPage'
 import { RestaurantsPage } from '../pages/RestaurantsPage'
 
 export const router = createBrowserRouter([
@@ -18,6 +19,10 @@ export const router = createBrowserRouter([
       {
         path: 'restaurants',
         element: <RestaurantsPage />,
+      },
+      {
+        path: 'restaurants/:id',
+        element: <RestaurantDetailPage />,
       },
       {
         path: 'login',
