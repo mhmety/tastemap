@@ -1,6 +1,6 @@
+import { MapPin } from 'lucide-react'
 import type { JSX } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin } from 'lucide-react'
 
 import type { Restaurant } from '../types/restaurant'
 import { RatingBadge } from './RatingBadge'
@@ -13,8 +13,8 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps): JSX.Element
   const description = restaurant.description ?? 'No description available for this restaurant yet.'
 
   return (
-    <article className="group flex h-full flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-4">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-slate-900">{restaurant.name}</h2>
           <p className="flex items-center gap-2 text-sm text-slate-600">

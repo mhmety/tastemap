@@ -1,20 +1,35 @@
-import type { JSX } from 'react'
-import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, MapPin } from 'lucide-react'
+import type { JSX } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErrorMessage } from '../components/ErrorMessage'
+import { FavoriteButton } from '../components/FavoriteButton'
 import { Loading } from '../components/Loading'
 import { MenuList } from '../components/MenuList'
 import { RatingBadge } from '../components/RatingBadge'
 import { ReviewList } from '../components/ReviewList'
+import { useAuth } from '../hooks/useAuth'
+import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRestaurantDetail } from '../hooks/useRestaurantDetail'
 
 export function RestaurantDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const { restaurant, isLoading, error, refetch } = useRestaurantDetail(id)
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const favorites = useFavorites()
 
   usePageTitle(restaurant ? restaurant.name : 'Restaurant Details')
+
+  const handleToggleFavorite = (restaurantId: string): void => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    void favorites.toggleFavorite(restaurantId)
+  }
 
   if (isLoading) {
     return (
@@ -75,8 +90,16 @@ export function RestaurantDetailPage(): JSX.Element {
       </div>
 
       <section className="rounded-[1.5rem] border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-3">
+        <div className="relative flex flex-col gap-6">
+          <FavoriteButton
+            restaurantId={restaurant.id}
+            isFavorite={favorites.isFavorite(restaurant.id)}
+            loading={favorites.isUpdating(restaurant.id)}
+            onToggle={handleToggleFavorite}
+            className="absolute right-0 top-0 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-red-200 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          />
+
+          <div className="space-y-3 pr-12">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
               {restaurant.name}
             </h1>
@@ -86,7 +109,9 @@ export function RestaurantDetailPage(): JSX.Element {
             </p>
             <p className="max-w-3xl text-sm leading-7 text-slate-600">{description}</p>
           </div>
-          <RatingBadge rating={restaurant.average_rating} />
+          <div className="flex items-center gap-3">
+            <RatingBadge rating={restaurant.average_rating} />
+          </div>
         </div>
       </section>
 

@@ -1,19 +1,121 @@
+import { Heart } from 'lucide-react'
 import type { JSX } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { fetchRestaurantDetail } from '../api/restaurants'
+import { ErrorMessage } from '../components/ErrorMessage'
+import { Loading } from '../components/Loading'
+import { RestaurantCard } from '../components/RestaurantCard'
+import { useAuth } from '../hooks/useAuth'
+import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
+import type { Restaurant } from '../types/restaurant'
 
 export function FavoritesPage(): JSX.Element {
   usePageTitle('Favorites')
 
+  const { isAuthenticated } = useAuth()
+  const favorites = useFavorites()
+
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [isLoadingRestaurants, setIsLoadingRestaurants] = useState<boolean>(true)
+  const [restaurantError, setRestaurantError] = useState<string | null>(null)
+
+  const favoriteRestaurantIds = useMemo(
+    () => favorites.favorites.map((favorite) => favorite.restaurant_id),
+    [favorites.favorites],
+  )
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setRestaurants([])
+      setIsLoadingRestaurants(false)
+      setRestaurantError(null)
+      return
+    }
+
+    if (favorites.isLoading) {
+      setIsLoadingRestaurants(true)
+      return
+    }
+
+    if (favoriteRestaurantIds.length === 0) {
+      setRestaurants([])
+      setIsLoadingRestaurants(false)
+      setRestaurantError(null)
+      return
+    }
+
+    let isCancelled = false
+
+    const load = async (): Promise<void> => {
+      setIsLoadingRestaurants(true)
+      setRestaurantError(null)
+
+      try {
+        const data = await Promise.all(
+          favoriteRestaurantIds.map(async (restaurantId) => fetchRestaurantDetail(restaurantId)),
+        )
+
+        if (isCancelled) return
+        setRestaurants(data)
+      } catch {
+        if (isCancelled) return
+        setRestaurantError('Unable to load favorite restaurants right now. Please try again.')
+        setRestaurants([])
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingRestaurants(false)
+        }
+      }
+    }
+
+    void load()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [favoriteRestaurantIds, favorites.isLoading, isAuthenticated])
+
+  const isLoading = favorites.isLoading || isLoadingRestaurants
+  const error = favorites.error ?? restaurantError
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="rounded-[1.5rem] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Favorites</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          Favorites will be connected in a future sprint.
-        </p>
-      </div>
+      <header className="space-y-2">
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Favorites</h1>
+        <p className="text-lg text-slate-600">Your saved restaurants in one place.</p>
+      </header>
+
+      <section className="mt-10 space-y-6">
+        {isLoading ? <Loading label="Loading favorites..." /> : null}
+
+        {!isLoading && error ? (
+          <ErrorMessage message={error} onRetry={() => void favorites.loadFavorites()} />
+        ) : null}
+
+        {!isLoading && !error && restaurants.length === 0 ? (
+          <div className="rounded-[1.5rem] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+            <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+              <Heart className="fill-orange-200" size={24} />
+            </div>
+            <h2 className="mt-5 text-2xl font-semibold text-slate-900">
+              No favorite restaurants yet.
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Open a restaurant and use the heart button on the detail page to add it to favorites.
+            </p>
+          </div>
+        ) : null}
+
+        {!isLoading && !error && restaurants.length > 0 ? (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {restaurants.map((restaurant) => (
+              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+            ))}
+          </div>
+        ) : null}
+      </section>
     </div>
   )
 }
-
