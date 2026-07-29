@@ -1,15 +1,22 @@
-import { Menu, Search, X } from 'lucide-react'
+import { LogOut, Menu, Search, X } from 'lucide-react'
 import type { JSX } from 'react'
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 
+import { useAuth } from '../hooks/useAuth'
 import type { NavigationItem } from '../types/navigation'
 
-const navigationItems: NavigationItem[] = [
+const loggedOutNavigation: NavigationItem[] = [
   { label: 'Home', to: '/' },
   { label: 'Restaurants', to: '/restaurants' },
   { label: 'Login', to: '/login' },
   { label: 'Register', to: '/register' },
+]
+
+const loggedInNavigation: NavigationItem[] = [
+  { label: 'Home', to: '/' },
+  { label: 'Restaurants', to: '/restaurants' },
+  { label: 'Favorites', to: '/favorites' },
 ]
 
 const baseLinkClass =
@@ -17,6 +24,16 @@ const baseLinkClass =
 
 export function Navbar(): JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navigate = useNavigate()
+  const { isAuthenticated, logout } = useAuth()
+
+  const navigationItems = isAuthenticated ? loggedInNavigation : loggedOutNavigation
+
+  const handleLogout = (): void => {
+    logout()
+    setIsMenuOpen(false)
+    navigate('/')
+  }
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -47,6 +64,16 @@ export function Navbar(): JSX.Element {
               {item.label}
             </NavLink>
           ))}
+          {isAuthenticated ? (
+            <button
+              type="button"
+              className={`${baseLinkClass} inline-flex items-center gap-2`}
+              onClick={handleLogout}
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          ) : null}
         </nav>
 
         <button
@@ -74,6 +101,16 @@ export function Navbar(): JSX.Element {
                 {item.label}
               </NavLink>
             ))}
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className={`${baseLinkClass} inline-flex items-center gap-2 text-left`}
+                onClick={handleLogout}
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            ) : null}
           </div>
         </nav>
       ) : null}

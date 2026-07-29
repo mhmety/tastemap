@@ -1,6 +1,6 @@
-import { MapPin } from 'lucide-react'
 import type { JSX } from 'react'
 import { Link } from 'react-router-dom'
+import { MapPin } from 'lucide-react'
 
 import type { Restaurant } from '../types/restaurant'
 import { RatingBadge } from './RatingBadge'

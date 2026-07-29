@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import auth, favorites, health, restaurants, reviews
+
+allowed_origins = ["http://localhost:5173"]
 
 openapi_tags = [
     {
@@ -48,6 +51,14 @@ app = FastAPI(
         "identifier": "MIT",
     },
     openapi_tags=openapi_tags,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(health.router)
