@@ -52,6 +52,8 @@ def _apply_restaurant_list_filters(
                 Restaurant.description.ilike(pattern),
                 # Use relationship filters so matching menu items do not duplicate restaurants.
                 Restaurant.menu_items.any(MenuItem.name.ilike(pattern)),
+                # Search restaurants by foods mentioned inside review comments (no JOIN; avoids duplicates).
+                Restaurant.reviews.any(Review.comment.ilike(pattern)),
             )
         )
 
@@ -125,7 +127,9 @@ def _serialize_restaurant_list_item(
 def list_restaurants(
     search: Annotated[
         Optional[str],
-        Query(description="Search by restaurant name, description, or menu item name"),
+        Query(
+            description="Search by restaurant name, description, menu item name, or review comment text"
+        ),
     ] = None,
     city: Annotated[Optional[str], Query(description="Filter by city")] = None,
     district: Annotated[Optional[str], Query(description="Filter by district")] = None,
@@ -152,7 +156,7 @@ def list_restaurants(
     List restaurants with optional search, filters, sorting, and pagination
     (public endpoint).
 
-    - **search**: Case-insensitive search on restaurant name, description, and menu item name.
+    - **search**: Case-insensitive search on restaurant name, description, menu item name, and review comment text.
     - **city**: Filter restaurants located in the given city.
     - **district**: Filter restaurants located in the given district.
     - **category**: Filter restaurants that have at least one menu item in this category.
