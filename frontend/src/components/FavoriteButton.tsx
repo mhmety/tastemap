@@ -1,5 +1,5 @@
-import { Heart } from 'lucide-react'
 import type { JSX } from 'react'
+import { Heart } from 'lucide-react'
 
 interface FavoriteButtonProps {
   restaurantId: string

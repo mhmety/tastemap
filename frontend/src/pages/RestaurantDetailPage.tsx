@@ -7,6 +7,7 @@ import { FavoriteButton } from '../components/FavoriteButton'
 import { Loading } from '../components/Loading'
 import { MenuList } from '../components/MenuList'
 import { RatingBadge } from '../components/RatingBadge'
+import { RestaurantActions } from '../components/RestaurantActions'
 import { ReviewList } from '../components/ReviewList'
 import { useAuth } from '../hooks/useAuth'
 import { useFavorites } from '../hooks/useFavorites'
@@ -112,6 +113,8 @@ export function RestaurantDetailPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <RatingBadge rating={restaurant.average_rating} />
           </div>
+
+          <RestaurantActions restaurant={restaurant} />
         </div>
       </section>
 

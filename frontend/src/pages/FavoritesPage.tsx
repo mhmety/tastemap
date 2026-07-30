@@ -7,9 +7,9 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { Loading } from '../components/Loading'
 import { RestaurantCard } from '../components/RestaurantCard'
 import { useAuth } from '../hooks/useAuth'
-import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
 import type { Restaurant } from '../types/restaurant'
+import { useFavorites } from '../hooks/useFavorites'
 
 export function FavoritesPage(): JSX.Element {
   usePageTitle('Favorites')
