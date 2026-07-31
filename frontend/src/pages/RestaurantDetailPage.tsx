@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { ArrowLeft, Clock, Globe, MapPin, Phone, Star, Utensils } from 'lucide-react'
 import type { JSX } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
@@ -13,6 +13,27 @@ import { useAuth } from '../hooks/useAuth'
 import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRestaurantDetail } from '../hooks/useRestaurantDetail'
+
+function buildTelUrl(phone: string): string {
+  const digitsOnly = phone.replace(/[^\d]/g, '')
+  if (digitsOnly.length === 0) {
+    return 'tel:'
+  }
+
+  if (digitsOnly.startsWith('90')) {
+    return `tel:+${digitsOnly}`
+  }
+
+  if (digitsOnly.startsWith('0')) {
+    return `tel:+90${digitsOnly.slice(1)}`
+  }
+
+  if (digitsOnly.length === 10) {
+    return `tel:+90${digitsOnly}`
+  }
+
+  return `tel:+${digitsOnly}`
+}
 
 export function RestaurantDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
@@ -76,10 +97,30 @@ export function RestaurantDetailPage(): JSX.Element {
     )
   }
 
-  const description = restaurant.description ?? 'No description available for this restaurant yet.'
+  const rawDescription = restaurant.description?.trim() ?? ''
+  const cityLower = restaurant.city.trim().toLowerCase()
+  const looksLikeAddress =
+    rawDescription.length > 0 &&
+    (/\d/.test(rawDescription) || rawDescription.includes(',') || rawDescription.toLowerCase().includes(cityLower))
+
+  const description = looksLikeAddress
+    ? 'No description available.'
+    : rawDescription || 'No description available.'
+
+  const address = looksLikeAddress
+    ? rawDescription
+    : `${restaurant.district}, ${restaurant.city}`
+
+  const ratingValue = restaurant.rating ?? null
+  const reviewCountValue = restaurant.review_count
+  const categoryValue = restaurant.category?.trim() ? restaurant.category.trim() : null
+  const openingHoursValue = restaurant.opening_hours?.trim() ? restaurant.opening_hours.trim() : null
+  const phoneValue = restaurant.phone?.trim() ? restaurant.phone.trim() : null
+  const websiteValue = restaurant.website?.trim() ? restaurant.website.trim() : null
+  const thumbnailValue = restaurant.thumbnail?.trim() ? restaurant.thumbnail.trim() : null
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Link
           to="/restaurants"
@@ -91,7 +132,7 @@ export function RestaurantDetailPage(): JSX.Element {
       </div>
 
       <section className="rounded-[1.5rem] border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="relative flex flex-col gap-6">
+        <div className="relative">
           <FavoriteButton
             restaurantId={restaurant.id}
             isFavorite={favorites.isFavorite(restaurant.id)}
@@ -100,21 +141,102 @@ export function RestaurantDetailPage(): JSX.Element {
             className="absolute right-0 top-0 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-red-200 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
           />
 
-          <div className="space-y-3 pr-12">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-              {restaurant.name}
-            </h1>
-            <p className="flex items-center gap-2 text-sm text-slate-600">
-              <MapPin size={16} />
-              {restaurant.city}, {restaurant.district}
-            </p>
-            <p className="max-w-3xl text-sm leading-7 text-slate-600">{description}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <RatingBadge rating={restaurant.average_rating} />
-          </div>
+          <div className="grid gap-8 lg:grid-cols-12">
+            <div className={thumbnailValue ? 'space-y-5 pr-12 lg:col-span-7' : 'space-y-5 pr-12 lg:col-span-12'}>
+              <div className="space-y-2">
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+                  {restaurant.name}
+                </h1>
+                <p className="flex items-center gap-2 text-sm text-slate-600">
+                  <MapPin size={16} />
+                  {restaurant.city}, {restaurant.district}
+                </p>
+              </div>
 
-          <RestaurantActions restaurant={restaurant} />
+              <div className="flex flex-wrap items-center gap-3">
+                <RatingBadge rating={restaurant.average_rating} />
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">
+                  <Star size={16} className="text-orange-500" />
+                  {ratingValue === null ? (
+                    <span>No ratings yet</span>
+                  ) : (
+                    <span>
+                      {ratingValue.toFixed(1)} ({reviewCountValue.toLocaleString()} reviews)
+                    </span>
+                  )}
+                </div>
+                {categoryValue ? (
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">
+                    <Utensils size={16} className="text-slate-500" />
+                    <span>{categoryValue}</span>
+                  </div>
+                ) : null}
+              </div>
+
+              <p className="text-sm leading-7 text-slate-600">{description}</p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <MapPin size={14} />
+                    Address
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-slate-700 whitespace-pre-line">{address}</div>
+                </div>
+
+                {openingHoursValue ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <Clock size={14} />
+                      Opening Hours
+                    </div>
+                    <div className="mt-2 text-sm leading-6 text-slate-700 whitespace-pre-line">{openingHoursValue}</div>
+                  </div>
+                ) : null}
+
+                {phoneValue ? (
+                  <a
+                    href={buildTelUrl(phoneValue)}
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-orange-200 hover:text-orange-600"
+                  >
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <Phone size={14} />
+                      Phone
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-slate-700">{phoneValue}</div>
+                  </a>
+                ) : null}
+
+                {websiteValue ? (
+                  <a
+                    href={websiteValue}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-orange-200 hover:text-orange-600"
+                  >
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <Globe size={14} />
+                      Website
+                    </div>
+                    <div className="mt-2 truncate text-sm font-semibold text-slate-700">{websiteValue}</div>
+                  </a>
+                ) : null}
+              </div>
+
+              <RestaurantActions restaurant={restaurant} />
+            </div>
+
+            {thumbnailValue ? (
+              <div className="lg:col-span-5">
+                <img
+                  src={thumbnailValue}
+                  alt={`${restaurant.name} thumbnail`}
+                  className="h-64 w-full rounded-2xl border border-slate-200 object-cover shadow-sm sm:h-72"
+                  loading="lazy"
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       </section>
 

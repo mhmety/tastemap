@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import DateTime, Float, String, func
+from sqlalchemy import DateTime, Float, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -58,6 +58,30 @@ class Restaurant(Base):
     description: Mapped[str | None] = mapped_column(
         String(1000),
         nullable=True
+    )
+    rating: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    review_count: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    category: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+    google_place_id: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+    thumbnail: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+    opening_hours: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

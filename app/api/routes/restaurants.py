@@ -106,6 +106,12 @@ def _serialize_restaurant_list_item(
             "website": restaurant.website,
             "phone": restaurant.phone,
             "description": restaurant.description,
+            "rating": restaurant.rating,
+            "review_count": restaurant.review_count,
+            "category": restaurant.category,
+            "google_place_id": restaurant.google_place_id,
+            "thumbnail": restaurant.thumbnail,
+            "opening_hours": restaurant.opening_hours,
             "average_rating": average_rating,
             "created_at": restaurant.created_at,
             "updated_at": restaurant.updated_at,
@@ -261,9 +267,9 @@ def get_restaurant_detail(
         )
 
     reviews = restaurant.reviews
-    review_count = len(reviews)
-    if review_count > 0:
-        average_rating = round(sum(r.rating for r in reviews) / review_count, 2)
+    tastemap_review_count = len(reviews)
+    if tastemap_review_count > 0:
+        average_rating = round(sum(r.rating for r in reviews) / tastemap_review_count, 2)
     else:
         average_rating = None
 
@@ -278,10 +284,17 @@ def get_restaurant_detail(
             "website": restaurant.website,
             "phone": restaurant.phone,
             "description": restaurant.description,
+            "rating": restaurant.rating if restaurant.rating is not None else average_rating,
+            "review_count": restaurant.review_count
+            if restaurant.review_count is not None
+            else tastemap_review_count,
+            "category": restaurant.category,
+            "google_place_id": restaurant.google_place_id,
+            "thumbnail": restaurant.thumbnail,
+            "opening_hours": restaurant.opening_hours,
             "created_at": restaurant.created_at,
             "updated_at": restaurant.updated_at,
             "average_rating": average_rating,
-            "review_count": review_count,
             "menu_items": list(restaurant.menu_items),
             "reviews": list(reviews),
         }

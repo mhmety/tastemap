@@ -13,6 +13,12 @@ export interface RestaurantApiItem {
   website: string | null
   phone: string | null
   description: string | null
+  rating: number | null
+  review_count: number | null
+  category: string | null
+  google_place_id: string | null
+  thumbnail: string | null
+  opening_hours: string | null
   average_rating: number | null
   created_at: string
   updated_at: string

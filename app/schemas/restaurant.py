@@ -140,6 +140,30 @@ class RestaurantResponse(BaseModel):
         default=None,
         description="Short description of the restaurant.",
     )
+    rating: Optional[float] = Field(
+        default=None,
+        description="External rating imported from providers (e.g., Google), or null if missing.",
+    )
+    review_count: Optional[int] = Field(
+        default=None,
+        description="External review count imported from providers, or null if missing.",
+    )
+    category: Optional[str] = Field(
+        default=None,
+        description="External category/type label for the restaurant, when available.",
+    )
+    google_place_id: Optional[str] = Field(
+        default=None,
+        description="Google Place ID (or equivalent provider identifier), when available.",
+    )
+    thumbnail: Optional[str] = Field(
+        default=None,
+        description="Thumbnail image URL for the restaurant, when available.",
+    )
+    opening_hours: Optional[str] = Field(
+        default=None,
+        description="Opening hours information as provided by the source, when available.",
+    )
     average_rating: Optional[float] = Field(
         default=None,
         description="Average rating calculated from reviews, or null if unrated.",
@@ -282,13 +306,35 @@ class RestaurantDetailResponse(BaseModel):
         default=None,
         description="Short description of the restaurant.",
     )
+    rating: Optional[float] = Field(
+        default=None,
+        description="External rating imported from providers (e.g., Google), or null if missing.",
+    )
+    category: Optional[str] = Field(
+        default=None,
+        description="External category/type label for the restaurant, when available.",
+    )
+    google_place_id: Optional[str] = Field(
+        default=None,
+        description="Google Place ID (or equivalent provider identifier), when available.",
+    )
+    thumbnail: Optional[str] = Field(
+        default=None,
+        description="Thumbnail image URL for the restaurant, when available.",
+    )
+    opening_hours: Optional[str] = Field(
+        default=None,
+        description="Opening hours information as provided by the source, when available.",
+    )
     created_at: datetime = Field(description="Timestamp when the restaurant was created.")
     updated_at: datetime = Field(description="Timestamp when the restaurant was last updated.")
     average_rating: Optional[float] = Field(
         default=None,
         description="Average rating calculated from all reviews, or null if unrated.",
     )
-    review_count: int = Field(description="Total number of reviews for the restaurant.")
+    review_count: int = Field(
+        description="Total number of reviews (external provider count if available; otherwise TasteMap review count)."
+    )
     menu_items: List[MenuItemResponse] = Field(
         description="Menu items currently associated with the restaurant.",
     )
