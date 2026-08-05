@@ -16,9 +16,15 @@ export interface RestaurantApiItem {
   rating: number | null
   review_count: number | null
   category: string | null
-  google_place_id: string | null
-  thumbnail: string | null
+  price_level: string | null
   opening_hours: string | null
+  operating_hours: Record<string, unknown> | null
+  thumbnail: string | null
+  google_place_id: string | null
+  serpapi_data_id: string | null
+  reviews_link: string | null
+  photos_link: string | null
+  user_review: string | null
   average_rating: number | null
   created_at: string
   updated_at: string
@@ -36,9 +42,13 @@ export interface MenuItem {
 
 export interface Review {
   id: string
-  user_id: string
+  user_id: string | null
   rating: number
   comment: string | null
+  author_name?: string | null
+  profile_photo?: string | null
+  likes?: number | null
+  source?: 'google' | 'user'
   created_at: string
   updated_at: string
 }
@@ -47,6 +57,7 @@ export interface RestaurantDetailResponse extends RestaurantApiItem {
   review_count: number
   menu_items: MenuItem[]
   reviews: Review[]
+  photos?: string[] | null
 }
 
 export interface PaginatedRestaurantsResponse {

@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import DateTime, Float, Integer, String, Text, func
+from sqlalchemy import JSON, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.models.menu_item import MenuItem
     from app.models.review import Review
     from app.models.favorite import Favorite
+    from app.models.google_review import GoogleReview
 
 
 class Restaurant(Base):
@@ -71,7 +72,23 @@ class Restaurant(Base):
         String(100),
         nullable=True,
     )
+    price_level: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+    opening_hours: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    operating_hours: Mapped[dict[str, str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
     google_place_id: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+    serpapi_data_id: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
     )
@@ -79,7 +96,15 @@ class Restaurant(Base):
         String(500),
         nullable=True,
     )
-    opening_hours: Mapped[str | None] = mapped_column(
+    reviews_link: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+    photos_link: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+    user_review: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
     )
@@ -105,6 +130,10 @@ class Restaurant(Base):
         cascade="all, delete-orphan",
     )
     favorites: Mapped[List["Favorite"]] = relationship(
+        back_populates="restaurant",
+        cascade="all, delete-orphan",
+    )
+    google_reviews: Mapped[List["GoogleReview"]] = relationship(
         back_populates="restaurant",
         cascade="all, delete-orphan",
     )

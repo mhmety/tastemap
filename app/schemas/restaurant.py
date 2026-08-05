@@ -1,7 +1,7 @@
 
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -142,27 +142,51 @@ class RestaurantResponse(BaseModel):
     )
     rating: Optional[float] = Field(
         default=None,
-        description="External rating imported from providers (e.g., Google), or null if missing.",
+        description="Rating returned by the external data provider (e.g., Google Maps via SerpAPI).",
     )
     review_count: Optional[int] = Field(
         default=None,
-        description="External review count imported from providers, or null if missing.",
+        description="Number of reviews returned by the external data provider (e.g., Google Maps via SerpAPI).",
     )
     category: Optional[str] = Field(
         default=None,
-        description="External category/type label for the restaurant, when available.",
+        description="Primary category/type returned by the external data provider.",
     )
-    google_place_id: Optional[str] = Field(
+    price_level: Optional[str] = Field(
         default=None,
-        description="Google Place ID (or equivalent provider identifier), when available.",
-    )
-    thumbnail: Optional[str] = Field(
-        default=None,
-        description="Thumbnail image URL for the restaurant, when available.",
+        description="Price level string returned by the external data provider.",
     )
     opening_hours: Optional[str] = Field(
         default=None,
-        description="Opening hours information as provided by the source, when available.",
+        description="Short opening hours string returned by the external data provider.",
+    )
+    operating_hours: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured operating hours returned by the external data provider.",
+    )
+    thumbnail: Optional[str] = Field(
+        default=None,
+        description="Restaurant thumbnail image URL returned by the external data provider.",
+    )
+    google_place_id: Optional[str] = Field(
+        default=None,
+        description="Google Maps place_id returned by the external data provider.",
+    )
+    serpapi_data_id: Optional[str] = Field(
+        default=None,
+        description="SerpAPI Google Maps data_id returned by the external data provider.",
+    )
+    reviews_link: Optional[str] = Field(
+        default=None,
+        description="SerpAPI URL for fetching reviews for this restaurant (not fetched yet).",
+    )
+    photos_link: Optional[str] = Field(
+        default=None,
+        description="SerpAPI URL for fetching photos for this restaurant (not fetched yet).",
+    )
+    user_review: Optional[str] = Field(
+        default=None,
+        description="Highlighted review snippet returned by the external data provider.",
     )
     average_rating: Optional[float] = Field(
         default=None,
@@ -255,30 +279,40 @@ class MenuItemResponse(BaseModel):
     )
 
 
-class ReviewResponse(BaseModel):
+class RestaurantReviewResponse(BaseModel):
     id: uuid.UUID = Field(description="Unique identifier of the review.")
-    user_id: uuid.UUID = Field(description="Identifier of the user who wrote the review.")
+    user_id: Optional[uuid.UUID] = Field(
+        default=None,
+        description="Identifier of the user who wrote the review (TasteMap reviews only).",
+    )
     rating: int = Field(description="Rating value from 1 to 5.")
     comment: Optional[str] = Field(
         default=None,
         description="Optional written comment for the review.",
     )
+    author_name: Optional[str] = Field(
+        default=None,
+        description="Reviewer display name when the review is imported from Google.",
+        max_length=255,
+    )
+    profile_photo: Optional[str] = Field(
+        default=None,
+        description="Reviewer profile photo URL when available.",
+        max_length=500,
+    )
+    likes: Optional[int] = Field(
+        default=None,
+        description="Number of likes/upvotes for the review when provided by the source.",
+        ge=0,
+    )
+    source: Literal["google", "user"] = Field(
+        default="user",
+        description="Review source identifier.",
+    )
     created_at: datetime = Field(description="Timestamp when the review was created.")
     updated_at: datetime = Field(description="Timestamp when the review was last updated.")
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_schema_extra={
-            "example": {
-                "id": "33333333-3333-3333-3333-333333333333",
-                "user_id": "f2dcda87-75f7-450d-8e29-1f201cd48658",
-                "rating": 5,
-                "comment": "Excellent burgers and quick service.",
-                "created_at": "2026-07-27T10:00:00Z",
-                "updated_at": "2026-07-27T10:00:00Z",
-            }
-        },
-    )
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RestaurantDetailResponse(BaseModel):
@@ -308,23 +342,47 @@ class RestaurantDetailResponse(BaseModel):
     )
     rating: Optional[float] = Field(
         default=None,
-        description="External rating imported from providers (e.g., Google), or null if missing.",
+        description="Rating returned by the external data provider (e.g., Google Maps via SerpAPI).",
     )
     category: Optional[str] = Field(
         default=None,
-        description="External category/type label for the restaurant, when available.",
+        description="Primary category/type returned by the external data provider.",
     )
-    google_place_id: Optional[str] = Field(
+    price_level: Optional[str] = Field(
         default=None,
-        description="Google Place ID (or equivalent provider identifier), when available.",
-    )
-    thumbnail: Optional[str] = Field(
-        default=None,
-        description="Thumbnail image URL for the restaurant, when available.",
+        description="Price level string returned by the external data provider.",
     )
     opening_hours: Optional[str] = Field(
         default=None,
-        description="Opening hours information as provided by the source, when available.",
+        description="Short opening hours string returned by the external data provider.",
+    )
+    operating_hours: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured operating hours returned by the external data provider.",
+    )
+    thumbnail: Optional[str] = Field(
+        default=None,
+        description="Restaurant thumbnail image URL returned by the external data provider.",
+    )
+    google_place_id: Optional[str] = Field(
+        default=None,
+        description="Google Maps place_id returned by the external data provider.",
+    )
+    serpapi_data_id: Optional[str] = Field(
+        default=None,
+        description="SerpAPI Google Maps data_id returned by the external data provider.",
+    )
+    reviews_link: Optional[str] = Field(
+        default=None,
+        description="SerpAPI URL for fetching reviews for this restaurant (not fetched yet).",
+    )
+    photos_link: Optional[str] = Field(
+        default=None,
+        description="SerpAPI URL for fetching photos for this restaurant (not fetched yet).",
+    )
+    user_review: Optional[str] = Field(
+        default=None,
+        description="Highlighted review snippet returned by the external data provider.",
     )
     created_at: datetime = Field(description="Timestamp when the restaurant was created.")
     updated_at: datetime = Field(description="Timestamp when the restaurant was last updated.")
@@ -332,13 +390,11 @@ class RestaurantDetailResponse(BaseModel):
         default=None,
         description="Average rating calculated from all reviews, or null if unrated.",
     )
-    review_count: int = Field(
-        description="Total number of reviews (external provider count if available; otherwise TasteMap review count)."
-    )
+    review_count: int = Field(description="Total number of reviews for the restaurant.")
     menu_items: List[MenuItemResponse] = Field(
         description="Menu items currently associated with the restaurant.",
     )
-    reviews: List[ReviewResponse] = Field(
+    reviews: List[RestaurantReviewResponse] = Field(
         description="Published reviews currently associated with the restaurant.",
     )
 

@@ -1,9 +1,10 @@
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import type { JSX } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Loading } from '../components/Loading'
+import { RestaurantCardSkeleton } from '../components/RestaurantCardSkeleton'
 import { RestaurantList } from '../components/RestaurantList'
 import { SearchBar } from '../components/SearchBar'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -14,9 +15,13 @@ const PAGE_SIZE = 6
 export function RestaurantsPage(): JSX.Element {
   usePageTitle('Restaurants')
 
-  const [searchInput, setSearchInput] = useState<string>('')
-  const [submittedSearch, setSubmittedSearch] = useState<string>('')
-  const [offset, setOffset] = useState<number>(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const submittedSearch = (searchParams.get('search') ?? '').trim()
+  const offset = Math.max(0, Number.parseInt(searchParams.get('offset') ?? '0', 10) || 0)
+
+  const [searchInput, setSearchInput] = useState<string>(submittedSearch)
+  const hasRestoredScrollRef = useRef(false)
 
   const { restaurants, total, limit, isLoading, error, refetch } = useRestaurants({
     search: submittedSearch,
@@ -30,9 +35,53 @@ export function RestaurantsPage(): JSX.Element {
   const hasNextPage = offset + limit < total
 
   const handleSearchSubmit = (): void => {
-    setOffset(0)
-    setSubmittedSearch(searchInput.trim())
+    hasRestoredScrollRef.current = true
+    window.scrollTo({ top: 0 })
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      const value = searchInput.trim()
+      if (value) next.set('search', value)
+      else next.delete('search')
+      next.set('offset', '0')
+      return next
+    })
   }
+
+  useEffect(() => {
+    setSearchInput(submittedSearch)
+  }, [submittedSearch])
+
+  useEffect(() => {
+    let rafId: number | null = null
+    const onScroll = (): void => {
+      if (rafId != null) return
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null
+        const currentState = window.history.state ?? {}
+        const usr = typeof currentState.usr === 'object' && currentState.usr ? currentState.usr : {}
+        window.history.replaceState(
+          { ...currentState, usr: { ...usr, scrollY: window.scrollY } },
+          '',
+        )
+      })
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      if (rafId != null) window.cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isLoading) return
+    if (hasRestoredScrollRef.current) return
+    const scrollY = window.history.state?.usr?.scrollY
+    if (typeof scrollY === 'number' && Number.isFinite(scrollY) && scrollY > 0) {
+      hasRestoredScrollRef.current = true
+      window.scrollTo({ top: scrollY })
+    }
+  }, [isLoading])
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
@@ -80,7 +129,13 @@ export function RestaurantsPage(): JSX.Element {
         </aside>
 
         <div className="space-y-6">
-          {isLoading ? <Loading /> : null}
+          {isLoading ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                <RestaurantCardSkeleton key={`restaurant-skeleton-${index}`} />
+              ))}
+            </div>
+          ) : null}
 
           {!isLoading && error ? <ErrorMessage message={error} onRetry={() => void refetch()} /> : null}
 
@@ -95,7 +150,15 @@ export function RestaurantsPage(): JSX.Element {
                 type="button"
                 disabled={!hasPreviousPage || isLoading}
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => setOffset((currentOffset) => Math.max(currentOffset - PAGE_SIZE, 0))}
+                onClick={() => {
+                  hasRestoredScrollRef.current = true
+                  window.scrollTo({ top: 0 })
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current)
+                    next.set('offset', String(Math.max(offset - PAGE_SIZE, 0)))
+                    return next
+                  })
+                }}
               >
                 <ChevronLeft size={16} />
                 Previous
@@ -104,7 +167,15 @@ export function RestaurantsPage(): JSX.Element {
                 type="button"
                 disabled={!hasNextPage || isLoading}
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => setOffset((currentOffset) => currentOffset + PAGE_SIZE)}
+                onClick={() => {
+                  hasRestoredScrollRef.current = true
+                  window.scrollTo({ top: 0 })
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current)
+                    next.set('offset', String(offset + PAGE_SIZE))
+                    return next
+                  })
+                }}
               >
                 Next
                 <ChevronRight size={16} />

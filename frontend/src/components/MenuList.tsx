@@ -1,5 +1,5 @@
-import type { JSX } from 'react'
 import { UtensilsCrossed } from 'lucide-react'
+import type { JSX } from 'react'
 
 import type { MenuItem } from '../types/restaurant'
 
@@ -10,9 +10,16 @@ interface MenuListProps {
 export function MenuList({ items }: MenuListProps): JSX.Element {
   if (items.length === 0) {
     return (
-      <div className="rounded-[1.5rem] border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-900">No menu items</h3>
-        <p className="mt-2 text-sm text-slate-600">This restaurant has not published menu items yet.</p>
+      <div className="rounded-[1.5rem] border border-slate-100 bg-slate-50 px-6 py-10 text-center">
+        <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm">
+          <UtensilsCrossed size={20} />
+        </div>
+        <div className="mt-6 flex items-center gap-3 text-slate-400">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Menu</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+        <p className="mt-4 text-sm font-semibold text-slate-700">Menu is being prepared.</p>
       </div>
     )
   }

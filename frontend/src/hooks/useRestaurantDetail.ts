@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 
 import { fetchRestaurantDetail } from '../api/restaurants'
-import type { RestaurantDetailResponse } from '../types/restaurant'
+import type { RestaurantDetailResponse, Review } from '../types/restaurant'
 
 interface UseRestaurantDetailResult {
   restaurant: RestaurantDetailResponse | null
   isLoading: boolean
   error: string | null
   refetch: () => Promise<void>
+  applyReviewCreated: (review: Review) => void
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Unable to load restaurant details right now. Please try again.'
@@ -52,10 +53,36 @@ export function useRestaurantDetail(restaurantId: string | undefined): UseRestau
     void loadRestaurant()
   }, [loadRestaurant])
 
+  const applyReviewCreated = useCallback((review: Review) => {
+    setRestaurant((current) => {
+      if (!current) return current
+      if (current.reviews.some((item) => item.id === review.id)) return current
+
+      const nextReviews = [review, ...current.reviews]
+      const ratings = nextReviews
+        .map((item) => item.rating)
+        .filter((value): value is number => typeof value === 'number' && value >= 1 && value <= 5)
+
+      const average =
+        ratings.length > 0
+          ? Math.round((ratings.reduce((sum, value) => sum + value, 0) / ratings.length) * 10) / 10
+          : null
+
+      return {
+        ...current,
+        reviews: nextReviews,
+        review_count: nextReviews.length,
+        rating: average,
+        average_rating: average,
+      }
+    })
+  }, [])
+
   return {
     restaurant,
     isLoading,
     error,
     refetch: loadRestaurant,
+    applyReviewCreated,
   }
 }

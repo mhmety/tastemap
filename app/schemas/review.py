@@ -1,7 +1,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,6 +25,28 @@ class ReviewCreate(BaseModel):
         json_schema_extra={
             "example": {
                 "restaurant_id": "4b4733c3-1136-4105-a957-dd4ed1cab0e2",
+                "rating": 5,
+                "comment": "Excellent burgers and quick service.",
+            }
+        }
+    )
+
+
+class RestaurantReviewCreate(BaseModel):
+    rating: int = Field(
+        ge=1,
+        le=5,
+        description="Numeric rating from 1 to 5.",
+    )
+    comment: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Optional written review comment.",
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
                 "rating": 5,
                 "comment": "Excellent burgers and quick service.",
             }
@@ -58,11 +80,33 @@ class ReviewUpdate(BaseModel):
 class ReviewResponse(BaseModel):
     id: uuid.UUID = Field(description="Unique identifier of the review.")
     restaurant_id: uuid.UUID = Field(description="Identifier of the reviewed restaurant.")
-    user_id: uuid.UUID = Field(description="Identifier of the user who created the review.")
+    user_id: Optional[uuid.UUID] = Field(
+        default=None,
+        description="Identifier of the user who created the review (TasteMap reviews only).",
+    )
     rating: int = Field(description="Numeric rating from 1 to 5.")
     comment: Optional[str] = Field(
         default=None,
         description="Optional written review comment.",
+    )
+    author_name: Optional[str] = Field(
+        default=None,
+        description="Reviewer display name when the review is imported from an external source (e.g., Google).",
+        max_length=255,
+    )
+    profile_photo: Optional[str] = Field(
+        default=None,
+        description="Reviewer profile photo URL when available.",
+        max_length=500,
+    )
+    likes: Optional[int] = Field(
+        default=None,
+        description="Number of likes/upvotes for the review when provided by the source.",
+        ge=0,
+    )
+    source: Literal["google", "user"] = Field(
+        default="user",
+        description="Review source identifier.",
     )
     created_at: datetime = Field(description="Timestamp when the review was created.")
     updated_at: datetime = Field(description="Timestamp when the review was last updated.")
@@ -76,6 +120,10 @@ class ReviewResponse(BaseModel):
                 "user_id": "f2dcda87-75f7-450d-8e29-1f201cd48658",
                 "rating": 5,
                 "comment": "Excellent burgers and quick service.",
+                "author_name": None,
+                "profile_photo": None,
+                "likes": None,
+                "source": "user",
                 "created_at": "2026-07-27T10:00:00Z",
                 "updated_at": "2026-07-27T10:00:00Z",
             }

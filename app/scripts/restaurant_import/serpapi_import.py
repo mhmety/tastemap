@@ -134,31 +134,60 @@ def _extract_int(value: Any) -> Optional[int]:
         return None
 
 
+def _repair_text(value: str) -> str:
+    text = value
+    for encoding in ("latin1", "cp1252"):
+        try:
+            repaired = text.encode(encoding).decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            continue
+        if repaired != text:
+            text = repaired
+    return text
+
+
+def _repair_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return _repair_text(value)
+    if isinstance(value, list):
+        return [_repair_value(item) for item in value]
+    if isinstance(value, dict):
+        return {k: _repair_value(v) for k, v in value.items()}
+    return value
+
+
 def _extract_restaurant_payload(item: dict[str, Any]) -> dict[str, Any]:
     gps = item.get("gps_coordinates")
     if not isinstance(gps, dict):
         gps = {}
 
     return {
-        "name": item.get("title") or item.get("name"),
-        "address": item.get("address"),
+        "name": _repair_value(item.get("title") or item.get("name")),
+        "address": _repair_value(item.get("address")),
         "latitude": _extract_float(gps.get("latitude") or item.get("latitude")),
         "longitude": _extract_float(gps.get("longitude") or item.get("longitude")),
         "rating": _extract_float(item.get("rating")),
         "review_count": _extract_int(item.get("reviews") or item.get("review_count")),
-        "phone": item.get("phone"),
-        "website": item.get("website"),
-        "opening_hours": item.get("hours"),
-        "category": item.get("type") or item.get("category"),
-        "google_maps_place_id": item.get("place_id") or item.get("google_maps_place_id"),
-        "thumbnail": item.get("thumbnail"),
+        "phone": _repair_value(item.get("phone")),
+        "website": _repair_value(item.get("website")),
+        "description": _repair_value(item.get("description")),
+        "opening_hours": _repair_value(item.get("hours")),
+        "operating_hours": _repair_value(item.get("operating_hours")),
+        "category": _repair_value(item.get("type") or item.get("category")),
+        "price_level": _repair_value(item.get("price")),
+        "google_maps_place_id": _repair_value(item.get("place_id") or item.get("google_maps_place_id")),
+        "serpapi_data_id": _repair_value(item.get("data_id") or item.get("serpapi_data_id")),
+        "thumbnail": _repair_value(item.get("thumbnail")),
+        "reviews_link": _repair_value(item.get("reviews_link")),
+        "photos_link": _repair_value(item.get("photos_link")),
+        "user_review": _repair_value(item.get("user_review")),
     }
 
 
 def _normalize_text(value: Optional[str], max_length: int) -> Optional[str]:
     if value is None:
         return None
-    text = str(value).strip()
+    text = _repair_text(str(value)).strip()
     if not text:
         return None
     return text[:max_length]
@@ -168,8 +197,8 @@ def _extract_district(address: Optional[str], city: str) -> str:
     if not address:
         return "Unknown"
 
-    normalized_city = city.strip().lower()
-    raw = address.strip()
+    normalized_city = _repair_text(city).strip().lower()
+    raw = _repair_text(address).strip()
 
     if "/" in raw:
         parts = [p.strip() for p in raw.split("/") if p.strip()]
@@ -237,12 +266,20 @@ def import_restaurants(city: str, raw_results: list[dict[str, Any]]) -> tuple[in
                                 rating=payload.get("rating"),
                                 review_count=payload.get("review_count"),
                                 category=_normalize_text(payload.get("category"), 100),
-                                google_place_id=_normalize_text(payload.get("google_maps_place_id"), 255),
-                                thumbnail=_normalize_text(payload.get("thumbnail"), 500),
+                                description=_normalize_text(payload.get("description"), 1000),
+                                price_level=_normalize_text(payload.get("price_level"), 20),
                                 opening_hours=_normalize_text(payload.get("opening_hours"), 4000),
+                                operating_hours=payload.get("operating_hours")
+                                if isinstance(payload.get("operating_hours"), dict)
+                                else None,
+                                google_place_id=_normalize_text(payload.get("google_maps_place_id"), 255),
+                                serpapi_data_id=_normalize_text(payload.get("serpapi_data_id"), 255),
+                                thumbnail=_normalize_text(payload.get("thumbnail"), 500),
+                                reviews_link=_normalize_text(payload.get("reviews_link"), 500),
+                                photos_link=_normalize_text(payload.get("photos_link"), 500),
+                                user_review=_normalize_text(payload.get("user_review"), 4000),
                                 website=_normalize_text(payload.get("website"), 255),
                                 phone=_normalize_text(payload.get("phone"), 50),
-                                description=_normalize_text(payload.get("address"), 1000),
                             )
                             db.add(restaurant)
                             db.flush()

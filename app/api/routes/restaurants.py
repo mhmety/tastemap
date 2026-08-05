@@ -1,5 +1,6 @@
 
 import uuid
+from datetime import datetime, timezone
 from typing import Annotated, Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
@@ -7,11 +8,13 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.selectable import Subquery
 
-from app.api.deps import CurrentAdmin
+from app.api.deps import CurrentAdmin, CurrentUser
 from app.db.session import get_db
+from app.models.google_review import GoogleReview
 from app.models.menu_item import MenuItem
 from app.models.restaurant import Restaurant
 from app.models.review import Review
+from app.schemas.review import RestaurantReviewCreate, ReviewResponse
 from app.schemas.restaurant import (
     RestaurantCreate,
     RestaurantDetailResponse,
@@ -19,24 +22,85 @@ from app.schemas.restaurant import (
     RestaurantResponse,
     RestaurantUpdate,
 )
+from app.services.google_reviews_sync import google_review_to_review_response_payload
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
+def _parse_iso_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    raw = value.strip()
+    if not raw:
+        return None
+    try:
+        if raw.endswith("Z"):
+            raw = raw[:-1] + "+00:00"
+        parsed = datetime.fromisoformat(raw)
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=timezone.utc)
+        return parsed
+    except ValueError:
+        return None
 
-def _build_average_rating_subquery() -> Subquery:
-    return (
+
+def _build_review_stats_subquery() -> Subquery:
+    google_stats = (
+        select(
+            GoogleReview.restaurant_id.label("restaurant_id"),
+            func.sum(GoogleReview.rating).label("rating_sum"),
+            func.count(GoogleReview.rating).label("rated_count"),
+            func.count(GoogleReview.id).label("review_count"),
+        )
+        .group_by(GoogleReview.restaurant_id)
+        .subquery()
+    )
+    user_stats = (
         select(
             Review.restaurant_id.label("restaurant_id"),
-            func.avg(Review.rating).label("average_rating"),
+            func.sum(Review.rating).label("rating_sum"),
+            func.count(Review.rating).label("rated_count"),
+            func.count(Review.id).label("review_count"),
         )
         .group_by(Review.restaurant_id)
+        .subquery()
+    )
+
+    joined = google_stats.join(
+        user_stats,
+        google_stats.c.restaurant_id == user_stats.c.restaurant_id,
+        full=True,
+    )
+
+    restaurant_id = func.coalesce(
+        google_stats.c.restaurant_id,
+        user_stats.c.restaurant_id,
+    ).label("restaurant_id")
+    rating_sum = func.coalesce(google_stats.c.rating_sum, 0) + func.coalesce(
+        user_stats.c.rating_sum, 0
+    )
+    rated_count = func.coalesce(google_stats.c.rated_count, 0) + func.coalesce(
+        user_stats.c.rated_count, 0
+    )
+    review_count = func.coalesce(google_stats.c.review_count, 0) + func.coalesce(
+        user_stats.c.review_count, 0
+    )
+
+    average_rating = (rating_sum / func.nullif(rated_count, 0)).label("average_rating")
+
+    return (
+        select(
+            restaurant_id,
+            average_rating,
+            review_count.label("review_count"),
+        )
+        .select_from(joined)
         .subquery()
     )
 
 
 def _apply_restaurant_list_filters(
     query: Any,
-    average_rating_subquery: Subquery,
+    review_stats_subquery: Subquery,
     search: Optional[str],
     city: Optional[str],
     district: Optional[str],
@@ -68,7 +132,7 @@ def _apply_restaurant_list_filters(
 
     if minimum_rating is not None:
         query = query.where(
-            average_rating_subquery.c.average_rating >= minimum_rating
+            review_stats_subquery.c.average_rating >= minimum_rating
         )
 
     return query
@@ -76,7 +140,7 @@ def _apply_restaurant_list_filters(
 
 def _apply_restaurant_list_sorting(
     query: Any,
-    average_rating_subquery: Subquery,
+    review_stats_subquery: Subquery,
     sort: Literal["name", "rating", "created_at"],
 ) -> Any:
     if sort == "name":
@@ -84,7 +148,7 @@ def _apply_restaurant_list_sorting(
 
     if sort == "rating":
         return query.order_by(
-            average_rating_subquery.c.average_rating.desc().nullslast(),
+            review_stats_subquery.c.average_rating.desc().nullslast(),
             Restaurant.created_at.desc(),
         )
 
@@ -94,7 +158,9 @@ def _apply_restaurant_list_sorting(
 def _serialize_restaurant_list_item(
     restaurant: Restaurant,
     average_rating: Optional[float],
+    review_count: int,
 ) -> RestaurantResponse:
+    rating = round(average_rating, 1) if average_rating is not None else None
     return RestaurantResponse.model_validate(
         {
             "id": restaurant.id,
@@ -106,13 +172,19 @@ def _serialize_restaurant_list_item(
             "website": restaurant.website,
             "phone": restaurant.phone,
             "description": restaurant.description,
-            "rating": restaurant.rating,
-            "review_count": restaurant.review_count,
+            "rating": rating,
+            "review_count": review_count,
             "category": restaurant.category,
-            "google_place_id": restaurant.google_place_id,
-            "thumbnail": restaurant.thumbnail,
+            "price_level": restaurant.price_level,
             "opening_hours": restaurant.opening_hours,
-            "average_rating": average_rating,
+            "operating_hours": restaurant.operating_hours,
+            "thumbnail": restaurant.thumbnail,
+            "google_place_id": restaurant.google_place_id,
+            "serpapi_data_id": restaurant.serpapi_data_id,
+            "reviews_link": restaurant.reviews_link,
+            "photos_link": restaurant.photos_link,
+            "user_review": restaurant.user_review,
+            "average_rating": rating,
             "created_at": restaurant.created_at,
             "updated_at": restaurant.updated_at,
         }
@@ -170,19 +242,22 @@ def list_restaurants(
     - **sort**: Sort by `name`, `rating`, or `created_at`.
     - **limit / offset**: Pagination controls.
     """
-    average_rating_subquery = _build_average_rating_subquery()
-    average_rating_column = average_rating_subquery.c.average_rating.label("average_rating")
+    review_stats_subquery = _build_review_stats_subquery()
+    average_rating_column = review_stats_subquery.c.average_rating.label("average_rating")
+    review_count_column = func.coalesce(review_stats_subquery.c.review_count, 0).label(
+        "review_count"
+    )
     restaurant_query = (
-        select(Restaurant, average_rating_column)
+        select(Restaurant, average_rating_column, review_count_column)
         .outerjoin(
-            average_rating_subquery,
-            average_rating_subquery.c.restaurant_id == Restaurant.id,
+            review_stats_subquery,
+            review_stats_subquery.c.restaurant_id == Restaurant.id,
         )
     )
 
     restaurant_query = _apply_restaurant_list_filters(
         restaurant_query,
-        average_rating_subquery,
+        review_stats_subquery,
         search,
         city,
         district,
@@ -191,7 +266,7 @@ def list_restaurants(
     )
     restaurant_query = _apply_restaurant_list_sorting(
         restaurant_query,
-        average_rating_subquery,
+        review_stats_subquery,
         sort,
     )
 
@@ -206,8 +281,8 @@ def list_restaurants(
     rows = result.all()
 
     items = [
-        _serialize_restaurant_list_item(restaurant, average_rating)
-        for restaurant, average_rating in rows
+        _serialize_restaurant_list_item(restaurant, average_rating, review_count)
+        for restaurant, average_rating, review_count in rows
     ]
 
     return RestaurantListResponse(
@@ -253,6 +328,7 @@ def get_restaurant_detail(
         .options(
             selectinload(Restaurant.menu_items),
             selectinload(Restaurant.reviews),
+            selectinload(Restaurant.google_reviews),
         )
         .where(Restaurant.id == restaurant_id)
     )
@@ -266,12 +342,56 @@ def get_restaurant_detail(
             detail="Restaurant not found",
         )
 
-    reviews = restaurant.reviews
-    tastemap_review_count = len(reviews)
-    if tastemap_review_count > 0:
-        average_rating = round(sum(r.rating for r in reviews) / tastemap_review_count, 2)
-    else:
-        average_rating = None
+    tastemap_reviews = restaurant.reviews
+    google_reviews = restaurant.google_reviews
+
+    combined_review_count = len(google_reviews) + len(tastemap_reviews)
+
+    rated_values = [
+        rating
+        for rating in ([r.rating for r in google_reviews] + [r.rating for r in tastemap_reviews])
+        if rating is not None
+    ]
+    combined_average_rating = (
+        round(sum(rated_values) / len(rated_values), 1) if rated_values else None
+    )
+
+    combined_items: list[tuple[datetime | None, dict[str, Any]]] = []
+
+    for google_review in google_reviews:
+        sort_dt = _parse_iso_datetime(google_review.review_date)
+        payload = google_review_to_review_response_payload(
+            google_review=google_review,
+            restaurant_id=restaurant.id,
+        )
+        combined_items.append((sort_dt, payload))
+
+    for review in tastemap_reviews:
+        combined_items.append(
+            (
+                review.created_at,
+                {
+                    "id": review.id,
+                    "user_id": review.user_id,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                    "created_at": review.created_at,
+                    "updated_at": review.updated_at,
+                    "author_name": None,
+                    "profile_photo": None,
+                    "likes": None,
+                    "source": "user",
+                },
+            )
+        )
+
+    combined_items.sort(
+        key=lambda item: (
+            item[0] is None,
+            -(item[0].timestamp() if item[0] is not None else 0.0),
+        )
+    )
+    combined_reviews = [payload for _, payload in combined_items]
 
     return RestaurantDetailResponse.model_validate(
         {
@@ -284,21 +404,82 @@ def get_restaurant_detail(
             "website": restaurant.website,
             "phone": restaurant.phone,
             "description": restaurant.description,
-            "rating": restaurant.rating if restaurant.rating is not None else average_rating,
-            "review_count": restaurant.review_count
-            if restaurant.review_count is not None
-            else tastemap_review_count,
+            "rating": combined_average_rating,
             "category": restaurant.category,
-            "google_place_id": restaurant.google_place_id,
-            "thumbnail": restaurant.thumbnail,
+            "price_level": restaurant.price_level,
             "opening_hours": restaurant.opening_hours,
+            "operating_hours": restaurant.operating_hours,
+            "thumbnail": restaurant.thumbnail,
+            "google_place_id": restaurant.google_place_id,
+            "serpapi_data_id": restaurant.serpapi_data_id,
+            "reviews_link": restaurant.reviews_link,
+            "photos_link": restaurant.photos_link,
+            "user_review": restaurant.user_review,
             "created_at": restaurant.created_at,
             "updated_at": restaurant.updated_at,
-            "average_rating": average_rating,
+            "average_rating": combined_average_rating,
+            "review_count": combined_review_count,
             "menu_items": list(restaurant.menu_items),
-            "reviews": list(reviews),
+            "reviews": combined_reviews,
         }
     )
+
+
+@router.post(
+    "/{restaurant_id}/reviews",
+    response_model=ReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a restaurant review",
+    description="Create a TasteMap user review for a restaurant as the currently authenticated user.",
+    response_description="The newly created review.",
+    responses={
+        201: {"description": "Review created successfully."},
+        401: {"description": "Authentication required."},
+        404: {"description": "Restaurant not found."},
+        409: {"description": "The user already reviewed this restaurant."},
+        422: {"description": "Validation error in the submitted payload."},
+    },
+)
+def create_restaurant_review(
+    restaurant_id: Annotated[
+        uuid.UUID,
+        Path(description="Unique identifier of the restaurant being reviewed."),
+    ],
+    data: RestaurantReviewCreate,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+) -> Review:
+    restaurant_exists = db.execute(
+        select(Restaurant.id).where(Restaurant.id == restaurant_id)
+    ).scalar_one_or_none()
+    if restaurant_exists is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found",
+        )
+
+    duplicate = db.execute(
+        select(Review.id).where(
+            Review.user_id == current_user.id,
+            Review.restaurant_id == restaurant_id,
+        )
+    ).scalar_one_or_none()
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already reviewed this restaurant",
+        )
+
+    review = Review(
+        restaurant_id=restaurant_id,
+        user_id=current_user.id,
+        rating=data.rating,
+        comment=data.comment,
+    )
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
 
 
 @router.post(
