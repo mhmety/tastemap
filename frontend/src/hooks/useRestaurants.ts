@@ -1,8 +1,8 @@
-import axios from 'axios'
 import { useCallback, useEffect, useState } from 'react'
 
 import { fetchRestaurants } from '../api/restaurants'
 import type { PaginatedRestaurantsResponse, Restaurant } from '../types/restaurant'
+import { normalizeApiErrorMessage } from '../utils/apiError'
 
 interface UseRestaurantsOptions {
   search: string
@@ -21,14 +21,6 @@ interface UseRestaurantsResult {
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Unable to load restaurants right now. Please try again.'
-
-function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.detail ?? DEFAULT_ERROR_MESSAGE
-  }
-
-  return DEFAULT_ERROR_MESSAGE
-}
 
 export function useRestaurants(options: UseRestaurantsOptions): UseRestaurantsResult {
   const { search, limit, offset } = options
@@ -57,7 +49,7 @@ export function useRestaurants(options: UseRestaurantsOptions): UseRestaurantsRe
       setPagination(data)
       setRestaurants(data.items)
     } catch (error: unknown) {
-      setError(getErrorMessage(error))
+      setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
       setRestaurants([])
     } finally {
       setIsLoading(false)

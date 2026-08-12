@@ -1,8 +1,8 @@
-import axios from 'axios'
 import type { JSX, ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 
 import { login as loginApi, register as registerApi } from '../api/auth'
+import { normalizeApiErrorMessage } from '../utils/apiError'
 import { AuthContext, type AuthContextValue, type AuthUser } from './auth-context'
 
 const DEFAULT_ERROR_MESSAGE = 'Authentication failed. Please try again.'
@@ -20,14 +20,6 @@ function decodeJwtSubject(token: string): string | null {
   } catch {
     return null
   }
-}
-
-function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.detail ?? DEFAULT_ERROR_MESSAGE
-  }
-
-  return DEFAULT_ERROR_MESSAGE
 }
 
 function getInitialUser(): AuthUser | null {
@@ -55,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       localStorage.setItem('access_token', tokenResponse.access_token)
       setUser({ id: decodeJwtSubject(tokenResponse.access_token) })
     } catch (error: unknown) {
-      setError(getErrorMessage(error))
+      setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
       localStorage.removeItem('access_token')
       setUser(null)
       throw error
@@ -75,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         localStorage.setItem('access_token', tokenResponse.access_token)
         setUser({ id: decodeJwtSubject(tokenResponse.access_token) })
       } catch (error: unknown) {
-        setError(getErrorMessage(error))
+        setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
         localStorage.removeItem('access_token')
         setUser(null)
         throw error

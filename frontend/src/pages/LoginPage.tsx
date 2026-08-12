@@ -92,11 +92,11 @@ export function LoginPage(): JSX.Element {
           </label>
 
           {formError ? (
-            <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>
+            <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 whitespace-pre-wrap">{formError}</p>
           ) : null}
 
           {!formError && error ? (
-            <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+            <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 whitespace-pre-wrap">{error}</p>
           ) : null}
 
           <button

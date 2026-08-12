@@ -91,8 +91,13 @@ def _next_page_token(response: dict[str, Any]) -> Optional[str]:
 
 
 def search_restaurants(city: str, *, max_pages: int = 3) -> list[dict[str, Any]]:
+    """Backward compatible: search for restaurants in a city."""
+    return search_places(query=f"restaurants in {city}", max_pages=max_pages)
+
+
+def search_places(query: str, *, max_pages: int = 3) -> list[dict[str, Any]]:
+    """Generic SerpAPI Google Maps search using a free‑form query."""
     api_key = get_serpapi_key()
-    query = f"restaurants in {city}"
 
     results: list[dict[str, Any]] = []
     next_token: Optional[str] = None

@@ -14,7 +14,7 @@ export function ErrorMessage({ message, onRetry }: ErrorMessageProps): JSX.Eleme
         <div className="space-y-3">
           <div>
             <h2 className="text-base font-semibold text-red-900">Something went wrong</h2>
-            <p className="mt-1 text-sm text-red-700">{message}</p>
+            <p className="mt-1 text-sm text-red-700 whitespace-pre-wrap">{message}</p>
           </div>
           {onRetry ? (
             <button

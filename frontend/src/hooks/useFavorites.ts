@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
 
 import { createFavorite, deleteFavorite, fetchMyFavorites, type FavoriteResponse } from '../api/favorites'
+import { normalizeApiErrorMessage } from '../utils/apiError'
 import { useAuth } from './useAuth'
 
 interface UseFavoritesResult {
@@ -17,14 +17,6 @@ interface UseFavoritesResult {
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Unable to update favorites right now. Please try again.'
-
-function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.detail ?? DEFAULT_ERROR_MESSAGE
-  }
-
-  return DEFAULT_ERROR_MESSAGE
-}
 
 export function useFavorites(): UseFavoritesResult {
   const { isAuthenticated } = useAuth()
@@ -61,7 +53,7 @@ export function useFavorites(): UseFavoritesResult {
       const data = await fetchMyFavorites()
       setFavorites(data)
     } catch (error: unknown) {
-      setError(getErrorMessage(error))
+      setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
       setFavorites([])
     } finally {
       setIsLoading(false)
@@ -100,7 +92,7 @@ export function useFavorites(): UseFavoritesResult {
         ])
       } catch (error: unknown) {
         setFavorites((current) => current.filter((favorite) => favorite.id !== optimisticFavorite.id))
-        setError(getErrorMessage(error))
+        setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
         throw error
       } finally {
         setUpdatingIds((current) => {
@@ -127,7 +119,7 @@ export function useFavorites(): UseFavoritesResult {
         await deleteFavorite(favorite.id)
       } catch (error: unknown) {
         setFavorites((current) => [favorite, ...current])
-        setError(getErrorMessage(error))
+        setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
         throw error
       } finally {
         setUpdatingIds((current) => {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import axios from 'axios'
 
 import { fetchRestaurantDetail } from '../api/restaurants'
 import type { RestaurantDetailResponse, Review } from '../types/restaurant'
+import { normalizeApiErrorMessage } from '../utils/apiError'
 
 interface UseRestaurantDetailResult {
   restaurant: RestaurantDetailResponse | null
@@ -13,14 +13,6 @@ interface UseRestaurantDetailResult {
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Unable to load restaurant details right now. Please try again.'
-
-function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.detail ?? DEFAULT_ERROR_MESSAGE
-  }
-
-  return DEFAULT_ERROR_MESSAGE
-}
 
 export function useRestaurantDetail(restaurantId: string | undefined): UseRestaurantDetailResult {
   const [restaurant, setRestaurant] = useState<RestaurantDetailResponse | null>(null)
@@ -42,7 +34,7 @@ export function useRestaurantDetail(restaurantId: string | undefined): UseRestau
       const data = await fetchRestaurantDetail(restaurantId)
       setRestaurant(data)
     } catch (error: unknown) {
-      setError(getErrorMessage(error))
+      setError(normalizeApiErrorMessage(error, DEFAULT_ERROR_MESSAGE))
       setRestaurant(null)
     } finally {
       setIsLoading(false)

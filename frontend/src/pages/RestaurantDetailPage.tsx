@@ -17,6 +17,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRestaurantDetail } from '../hooks/useRestaurantDetail'
+import { normalizeApiErrorMessage } from '../utils/apiError'
 
 function buildTelUrl(phone: string): string {
   const digitsOnly = phone.replace(/[^\d]/g, '')
@@ -131,7 +132,9 @@ export function RestaurantDetailPage(): JSX.Element {
         } else if (status === 409) {
           setReviewError('You already reviewed this restaurant.')
         } else {
-          setReviewError(error.response?.data?.detail ?? 'Unable to submit review right now.')
+          setReviewError(
+            normalizeApiErrorMessage(error, 'Unable to submit review right now.'),
+          )
         }
       } else {
         setReviewError('Unable to submit review right now.')
@@ -437,7 +440,7 @@ export function RestaurantDetailPage(): JSX.Element {
             />
 
             {reviewError ? (
-              <div className="mt-3 text-sm font-semibold text-rose-600">{reviewError}</div>
+              <div className="mt-3 text-sm font-semibold text-rose-600 whitespace-pre-wrap">{reviewError}</div>
             ) : null}
 
             <div className="mt-4 flex items-center justify-end">
