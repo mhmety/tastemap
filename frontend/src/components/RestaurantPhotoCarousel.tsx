@@ -137,16 +137,16 @@ export function RestaurantPhotoCarousel({
           </div>
           <button
             type="button"
-            aria-label="Previous photo"
-            className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
+            aria-label="Önceki fotoğraf"
+            className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer"
             onClick={handlePrevious}
           >
             <ChevronLeft size={18} />
           </button>
           <button
             type="button"
-            aria-label="Next photo"
-            className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
+            aria-label="Sonraki fotoğraf"
+            className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer"
             onClick={handleNext}
           >
             <ChevronRight size={18} />
@@ -157,7 +157,7 @@ export function RestaurantPhotoCarousel({
               <button
                 key={`photo-dot-${index}`}
                 type="button"
-                aria-label={`Go to photo ${index + 1}`}
+                aria-label={`Fotoğraf ${index + 1}`}
                 className={`h-2.5 w-2.5 rounded-full transition ${index === activeIndex ? 'bg-orange-500' : 'bg-slate-300 hover:bg-slate-400'
                   }`}
                 onClick={() => goToIndex(index)}

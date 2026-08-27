@@ -1,8 +1,7 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 import { Layout } from '../components/Layout'
 import { FavoritesPage } from '../pages/FavoritesPage'
-import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { RestaurantDetailPage } from '../pages/RestaurantDetailPage'
@@ -16,11 +15,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: <RestaurantsPage />,
       },
       {
         path: 'restaurants',
-        element: <RestaurantsPage />,
+        element: <Navigate to="/" replace />,
       },
       {
         path: 'restaurants/:id',
@@ -45,3 +44,4 @@ export const router = createBrowserRouter([
     ],
   },
 ])
+

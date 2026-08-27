@@ -22,9 +22,9 @@ export function ContactChips({ websiteUrl, phoneLabel, phoneHref }: ContactChips
       {hasPhone ? (
         <a
           href={phoneHref as string}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-md active:translate-y-0 sm:w-[min(280px,calc(50%-0.375rem))]"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-xs font-bold text-slate-700 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-md active:translate-y-0 sm:w-auto"
         >
-          <Phone size={16} className="text-slate-500" />
+          <Phone size={14} className="text-slate-500" />
           {phoneLabel as string}
         </a>
       ) : null}
@@ -34,12 +34,13 @@ export function ContactChips({ websiteUrl, phoneLabel, phoneHref }: ContactChips
           href={websiteUrl as string}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-md active:translate-y-0 sm:w-[min(280px,calc(50%-0.375rem))]"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-xs font-bold text-slate-700 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-md active:translate-y-0 sm:w-auto"
         >
-          <Globe size={16} className="text-slate-500" />
-          Site
+          <Globe size={14} className="text-slate-500" />
+          Web Sitesi
         </a>
       ) : null}
     </div>
   )
 }
+

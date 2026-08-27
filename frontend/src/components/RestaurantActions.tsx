@@ -19,14 +19,15 @@ export function RestaurantActions({
           href={websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`Visit ${restaurant.name} website`}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-sm active:translate-y-0 sm:w-auto"
+          aria-label={`${restaurant.name} web sitesini ziyaret et`}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-xs font-bold text-slate-700 transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-sm active:translate-y-0 sm:w-auto"
         >
           <Globe size={16} />
-          Visit Website
-          <ExternalLink size={16} className="text-slate-400" />
+          Web Sitesi
+          <ExternalLink size={14} className="text-slate-400" />
         </a>
       ) : null}
     </div>
   )
 }
+

@@ -21,29 +21,30 @@ export function SearchBar({
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm sm:flex-row"
+      className="flex flex-col gap-2 rounded-2xl sm:rounded-full border border-slate-200/90 bg-white p-2 shadow-sm sm:flex-row sm:items-center focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition"
       onSubmit={handleSubmit}
     >
-      <label className="relative flex-1">
+      <div className="relative flex-1">
         <Search
           className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-          size={18}
+          size={20}
         />
         <input
           type="search"
           value={value}
-          placeholder="Restoran adı veya yemek ara"
-          className="w-full rounded-full border border-slate-200 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-orange-400"
+          placeholder="Yemek, restoran veya mutfak türü ara (örn: Döner, Kadıköy, Baklava)..."
+          className="w-full rounded-full bg-transparent py-3 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
           onChange={(event) => onChange(event.target.value)}
         />
-      </label>
+      </div>
       <button
         type="submit"
         disabled={isLoading}
-        className="rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
+        className="rounded-full bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 active:scale-95 disabled:cursor-not-allowed disabled:bg-orange-300 sm:px-8"
       >
-Ara
+        {isLoading ? 'Aranıyor...' : 'Ara'}
       </button>
     </form>
   )
 }
+

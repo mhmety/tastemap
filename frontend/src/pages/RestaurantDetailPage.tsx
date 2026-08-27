@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ArrowLeft, Clock, MapPin, Star, Tag } from 'lucide-react'
 import type { JSX } from 'react'
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -10,7 +11,7 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { FavoriteButton } from '../components/FavoriteButton'
 import { Loading } from '../components/Loading'
 import { MenuList } from '../components/MenuList'
-import { OperatingHoursAccordion } from '../components/OperatingHoursAccordion'
+import { OperatingHoursModal } from '../components/OperatingHoursModal'
 import { RestaurantPhotoCarousel } from '../components/RestaurantPhotoCarousel'
 import { ReviewList } from '../components/ReviewList'
 import { useAuth } from '../hooks/useAuth'
@@ -18,6 +19,7 @@ import { useFavorites } from '../hooks/useFavorites'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRestaurantDetail } from '../hooks/useRestaurantDetail'
 import { normalizeApiErrorMessage } from '../utils/apiError'
+import { formatCategoryTr, formatOpeningHoursTr } from '../utils/localization'
 
 function buildTelUrl(phone: string): string {
   const digitsOnly = phone.replace(/[^\d]/g, '')
@@ -70,11 +72,12 @@ export function RestaurantDetailPage(): JSX.Element {
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [isHoursModalOpen, setIsHoursModalOpen] = useState<boolean>(false)
 
   const backTo = useMemo(() => {
     const state = location.state as { from?: string } | null
     if (state?.from && typeof state.from === 'string') return state.from
-    return '/restaurants'
+    return '/'
   }, [location.state])
 
   useEffect(() => {
@@ -85,15 +88,15 @@ export function RestaurantDetailPage(): JSX.Element {
 
   const starsDisplayValue = hoverRating > 0 ? hoverRating : selectedRating
 
-  const canSubmitReview = useMemo(() => selectedRating >= 1 && selectedRating <= 5 && !isSubmittingReview, [
-    selectedRating,
-    isSubmittingReview,
-  ])
+  const canSubmitReview = useMemo(
+    () => selectedRating >= 1 && selectedRating <= 5 && !isSubmittingReview,
+    [selectedRating, isSubmittingReview],
+  )
 
   const submitReview = useCallback(async () => {
     if (!id) return
     if (!isAuthenticated) {
-      setReviewError('Yorum yapabilmek için giriş yapmanız gerekiyor.')
+      setReviewError('Yorum yapabilmek için lütfen giriş yapın.')
       return
     }
     if (selectedRating < 1 || selectedRating > 5) return
@@ -122,22 +125,22 @@ export function RestaurantDetailPage(): JSX.Element {
       setSelectedRating(0)
       setHoverRating(0)
       setComment('')
-      setToastMessage('Yorumunuz gönderildi.')
+      setToastMessage('Yorumunuz başarıyla kaydedildi.')
       await refetch()
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status
         if (status === 401) {
-          setReviewError('Giriş yapılmalı.')
+          setReviewError('Yorum yapmak için giriş yapmalısınız.')
         } else if (status === 409) {
-          setReviewError('Bu restorana zaten yorum yapılmış.')
+          setReviewError('Bu restorana daha önce yorum yaptınız.')
         } else {
           setReviewError(
-            normalizeApiErrorMessage(error, 'Yorum yapılamıyor.')
+            normalizeApiErrorMessage(error, 'Yorum gönderilirken bir hata oluştu.')
           )
         }
       } else {
-        setReviewError('Yorum yapılamıyor.')
+        setReviewError('Yorum gönderilirken bir hata oluştu.')
       }
     } finally {
       setIsSubmittingReview(false)
@@ -183,16 +186,16 @@ export function RestaurantDetailPage(): JSX.Element {
   if (!restaurant) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Restoran bulunamadı</h1>
+        <div className="rounded-[2rem] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
+          <h1 className="text-2xl font-bold text-slate-900">Restoran bulunamadı</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Aradığınız restoran bulunamadı veya kaldırılmış olabilir.
+            Aradığınız restoran bulunamadı veya sistemden kaldırılmış olabilir.
           </p>
           <Link
-            to={backTo}
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
+            to="/"
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
           >
-            Restoranları Tara
+            Restoranları Keşfet
           </Link>
         </div>
       </div>
@@ -201,12 +204,13 @@ export function RestaurantDetailPage(): JSX.Element {
 
   const ratingValue = restaurant.rating ?? restaurant.average_rating
   const ratingText = ratingValue == null ? 'Değerlendirilmedi' : ratingValue.toFixed(1)
-  const reviewCountText = restaurant.review_count == null ? null : restaurant.review_count.toLocaleString()
+  const reviewCountText = restaurant.review_count == null ? null : restaurant.review_count.toLocaleString('tr-TR')
 
   const phoneValue = restaurant.phone?.trim() ? restaurant.phone.trim() : null
-  const categoryValue = restaurant.category?.trim() ? restaurant.category.trim() : null
+  const categoryValue = formatCategoryTr(restaurant.category)
   const priceValue = restaurant.price_level?.trim() ? restaurant.price_level.trim() : null
-  const openingHoursValue = restaurant.opening_hours?.trim() ? restaurant.opening_hours.trim() : null
+  const rawOpeningHours = restaurant.opening_hours?.trim() ? restaurant.opening_hours.trim() : null
+  const openingHoursValue = formatOpeningHoursTr(rawOpeningHours)
   const descriptionValue = restaurant.description?.trim() ? restaurant.description.trim() : null
 
   const operatingHours = (() => {
@@ -217,13 +221,13 @@ export function RestaurantDetailPage(): JSX.Element {
   })()
 
   const operatingHoursOrder: Array<{ key: string; label: string }> = [
-    { key: 'monday', label: 'Monday' },
-    { key: 'tuesday', label: 'Tuesday' },
-    { key: 'wednesday', label: 'Wednesday' },
-    { key: 'thursday', label: 'Thursday' },
-    { key: 'friday', label: 'Friday' },
-    { key: 'saturday', label: 'Saturday' },
-    { key: 'sunday', label: 'Sunday' },
+    { key: 'monday', label: 'Pazartesi' },
+    { key: 'tuesday', label: 'Salı' },
+    { key: 'wednesday', label: 'Çarşamba' },
+    { key: 'thursday', label: 'Perşembe' },
+    { key: 'friday', label: 'Cuma' },
+    { key: 'saturday', label: 'Cumartesi' },
+    { key: 'sunday', label: 'Pazar' },
   ]
 
   const operatingHoursRows = (() => {
@@ -231,31 +235,24 @@ export function RestaurantDetailPage(): JSX.Element {
     const rows = operatingHoursOrder
       .map(({ key, label }) => {
         const value = operatingHours[key]
-        if (typeof value !== 'string') return { label, value: null }
+        if (typeof value !== 'string') return { key, label, value: null }
         const trimmed = value.trim()
-        return { label, value: trimmed.length > 0 ? trimmed : null }
+        return { key, label, value: trimmed.length > 0 ? trimmed : null }
       })
-      .filter((row): row is { label: string; value: string } => row.value !== null)
+      .filter((row): row is { key: string; label: string; value: string } => row.value !== null)
 
     return rows.length > 0 ? rows : null
   })()
 
-  const todayLabel = (() => {
+  const todayKey = (() => {
     const dayIndex = new Date().getDay()
     const keys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
-    const key = keys[dayIndex] ?? 'monday'
-    return operatingHoursOrder.find((item) => item.key === key)?.label
-  })()
-
-  const todayHoursValue = (() => {
-    if (!todayLabel) return null
-    const row = operatingHoursRows?.find((item) => item.label === todayLabel)
-    return row?.value ?? null
+    return keys[dayIndex] ?? 'monday'
   })()
 
   const isOpen = (() => {
-    if (!openingHoursValue) return null
-    const lowered = openingHoursValue.toLowerCase()
+    if (!rawOpeningHours) return null
+    const lowered = rawOpeningHours.toLowerCase()
     if (lowered.startsWith('open')) return true
     if (lowered.startsWith('closed')) return false
     return null
@@ -271,12 +268,13 @@ export function RestaurantDetailPage(): JSX.Element {
   )
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       {toastMessage ? (
-        <div className="fixed bottom-6 right-6 z-50 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-xl animate-in slide-in-from-bottom-2">
           {toastMessage}
         </div>
       ) : null}
+
       <div className="mb-6">
         <Link
           to={backTo}
@@ -287,7 +285,8 @@ export function RestaurantDetailPage(): JSX.Element {
         </Link>
       </div>
 
-      <section className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+      {/* Restoran Başlık Kartı */}
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="relative">
           <FavoriteButton
             restaurantId={restaurant.id}
@@ -306,12 +305,14 @@ export function RestaurantDetailPage(): JSX.Element {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{restaurant.name}</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                  {restaurant.name}
+                </h1>
 
                 <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
                   {categoryValue ? (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                      <Tag size={16} className="text-slate-500" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
+                      <Tag size={14} className="text-slate-500" />
                       {categoryValue}
                     </span>
                   ) : null}
@@ -323,9 +324,18 @@ export function RestaurantDetailPage(): JSX.Element {
                   ) : null}
 
                   {openingHoursValue ? (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => operatingHoursRows && setIsHoursModalOpen(true)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                        operatingHoursRows
+                          ? 'cursor-pointer bg-slate-100 hover:bg-orange-50 hover:text-orange-700 active:scale-95'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                      title={operatingHoursRows ? 'Haftalık çalışma saatlerini görmek için tıklayın' : undefined}
+                    >
                       <Clock
-                        size={16}
+                        size={14}
                         className={
                           isOpen === true
                             ? 'text-emerald-600'
@@ -335,40 +345,46 @@ export function RestaurantDetailPage(): JSX.Element {
                         }
                       />
                       <span className="line-clamp-1">{openingHoursValue}</span>
-                    </span>
+                      {operatingHoursRows ? (
+                        <span className="text-[10px] text-slate-400 font-normal">▼</span>
+                      ) : null}
+                    </button>
                   ) : null}
                 </div>
               </div>
 
+              {/* Yorumlar ve Puan Butonu */}
               <button
                 type="button"
                 aria-label="Yorumlara git"
                 className="group flex w-full cursor-pointer flex-col gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-sm active:translate-y-0"
                 onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
                   <Star size={18} className="fill-current text-amber-500" />
-                  <span>{ratingText}</span>
+                  <span>{ratingText} / 5</span>
                 </div>
-                <div className="text-sm text-slate-600 group-hover:text-slate-700">
-                  {reviewCountText ? `${reviewCountText} Yorum` : 'Yorum'}
+                <div className="text-xs font-medium text-slate-500 group-hover:text-orange-600 transition">
+                  {reviewCountText ? `${reviewCountText} değerlendirme · Yorumları görüntüle` : 'Yorumları görüntüle'}
                 </div>
               </button>
 
+              {/* Konum ve Google Maps Bağlantısı */}
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                     <MapPin size={18} className="text-slate-500" />
                     <span className="truncate">
-                      {restaurant.district} / {restaurant.city}
+                      {restaurant.district} · {restaurant.city}
                     </span>
                   </div>
                   <a
                     href={googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${restaurant.name} Google Haritalarında Aç`}
+                    aria-label={`${restaurant.name} Google Haritalar'da Aç`}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#4285F4]/30 bg-white text-[#4285F4] transition duration-200 hover:-translate-y-0.5 hover:border-[#4285F4]/60 hover:bg-[#4285F4]/5 hover:shadow-sm active:translate-y-0"
+                    title="Google Haritalar'da Aç"
                   >
                     <MapPin size={18} />
                   </a>
@@ -377,10 +393,10 @@ export function RestaurantDetailPage(): JSX.Element {
 
               {descriptionValue ? (
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
                     Açıklama
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{descriptionValue}</p>
+                  <p className="mt-1.5 text-sm leading-6 text-slate-700">{descriptionValue}</p>
                 </div>
               ) : null}
 
@@ -394,21 +410,17 @@ export function RestaurantDetailPage(): JSX.Element {
         </div>
       </section>
 
-      {operatingHoursRows ? (
-        <OperatingHoursAccordion rows={operatingHoursRows} todayLabel={todayLabel} todayValue={todayHoursValue} />
-      ) : null}
-
-      <section className="mt-10 grid gap-6 lg:grid-cols-2 auto-rows-[minmax(0,1fr)]">
+      {/* Menü ve Yorumlar Bölümü */}
+      <section className="mt-8 grid gap-8 lg:grid-cols-2 auto-rows-[minmax(0,1fr)]">
         <div className="h-0 min-h-full">
           <MenuList items={restaurant.menu_items} />
         </div>
-        <div ref={reviewsRef} className="min-h-0">
-          <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-slate-900">Yorum Yap</h3>
-                <p className="text-sm text-slate-600">Deneyiminizi paylaşın...</p>
-              </div>
+        <div ref={reviewsRef} className="min-h-0 space-y-6">
+          {/* Yorum Yap Kartı */}
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">Yorum Yap</h3>
+              <p className="text-xs text-slate-500">Restoran ve lezzet deneyiminizi paylaşın</p>
             </div>
 
             <div className="mt-4 flex items-center gap-2">
@@ -419,22 +431,22 @@ export function RestaurantDetailPage(): JSX.Element {
                   <button
                     key={`review-star-${value}`}
                     type="button"
-                    className="rounded-lg p-1 text-amber-500 transition hover:scale-105"
-                    aria-label={`${value} Yıldız Puanla`}
+                    className="rounded-lg p-1 text-amber-500 transition hover:scale-110 active:scale-95"
+                    aria-label={`${value} Yıldız`}
                     onMouseEnter={() => setHoverRating(value)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setSelectedRating(value)}
                     disabled={isSubmittingReview}
                   >
-                    <Star size={22} className={isActive ? 'fill-current' : 'text-slate-200'} />
+                    <Star size={24} className={isActive ? 'fill-current' : 'text-slate-200'} />
                   </button>
                 )
               })}
             </div>
 
             <textarea
-              className="mt-4 h-28 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-orange-200 focus:ring-2 focus:ring-orange-100"
-              placeholder="Deneyiminizi paylaşın..."
+              className="mt-4 h-28 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 shadow-inner outline-none transition focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100"
+              placeholder="Yemekler, servis ve atmosfer nasıldı? Görüşlerinizi yazın..."
               value={comment}
               maxLength={1000}
               onChange={(event) => setComment(event.target.value)}
@@ -442,7 +454,9 @@ export function RestaurantDetailPage(): JSX.Element {
             />
 
             {reviewError ? (
-              <div className="mt-3 text-sm font-semibold text-rose-600 whitespace-pre-wrap">{reviewError}</div>
+              <div className="mt-3 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-600 whitespace-pre-wrap">
+                {reviewError}
+              </div>
             ) : null}
 
             <div className="mt-4 flex items-center justify-end">
@@ -450,15 +464,28 @@ export function RestaurantDetailPage(): JSX.Element {
                 type="button"
                 onClick={() => void submitReview()}
                 disabled={!canSubmitReview}
-                className="inline-flex items-center justify-center rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                className="inline-flex items-center justify-center rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
               >
-                {isSubmittingReview ? 'Gönderiliyor…' : 'Yorum Gönder'}
+                {isSubmittingReview ? 'Gönderiliyor...' : 'Yorumu Gönder'}
               </button>
             </div>
           </div>
+
           <ReviewList reviews={restaurant.reviews} featuredReview={restaurant.user_review} />
         </div>
       </section>
+
+      {/* Çalışma Saatleri Modalı */}
+      {operatingHoursRows ? (
+        <OperatingHoursModal
+          isOpen={isHoursModalOpen}
+          onClose={() => setIsHoursModalOpen(false)}
+          restaurantName={restaurant.name}
+          rows={operatingHoursRows}
+          todayKey={todayKey}
+        />
+      ) : null}
     </div>
   )
 }
+
