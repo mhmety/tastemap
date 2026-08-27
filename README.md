@@ -52,10 +52,10 @@ Security & Exception   Alembic Migrations
 ## UI & API Showcase
 
 ### Restaurant Discovery & Dish Search
-![Homepage](docs/screenshots/homepage.png)
+![Homepage](docs/screenshots/homeepage.png)
 
 ### Venue Details, Live Menu & Reviews
-![Detail Page](docs/screenshots/detailpage.png)
+![Detail Page](docs/screenshots/restaurantpage.png)
 
 ### Interactive API Documentation (Swagger)
 ![Swagger UI](docs/screenshots/swagger.png)
