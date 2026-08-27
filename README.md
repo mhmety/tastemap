@@ -89,6 +89,7 @@ Security & Exception   Alembic Migrations
 - **Dish-First Search:** Discover meals directly with accurate pricing instead of browsing generic venue lists.
 - **Robust Data Pipeline:** Sanitized real-world review datasets and normalized unstructured digital menus.
 - **Production-Ready Security:** Hardened CORS, parameterized ORM queries against SQL injection, and zero-leak exception handling.
+- **Progressive Menu Coverage:** Currently includes fully enriched digital menus for launch venues; automated ingestion pipeline is expanding coverage for remaining locations progressively.
 
 ---
 

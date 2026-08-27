@@ -115,13 +115,14 @@ export function MenuList({ items }: MenuListProps): JSX.Element {
         <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600 shadow-sm">
           <UtensilsCrossed size={24} />
         </div>
-        <h3 className="mt-4 text-lg font-bold text-slate-900">Menü Henüz Eklenmemiş</h3>
-        <p className="mt-1 text-xs text-slate-500 max-w-xs">
-          Bu restoran için henüz dijital menü verisi sisteme yüklenmemiş.
+        <h3 className="mt-4 text-lg font-bold text-slate-900">Dijital Menü Yakında Eklenecek</h3>
+        <p className="mt-1.5 text-xs text-slate-500 max-w-xs leading-5">
+          Bu restoranın dijital menüsü hazırlanıyor, çok yakında burada olacak.
         </p>
       </div>
     )
   }
+
 
   const toggleCategory = (categoryName: string): void => {
     setExpanded((prev) => ({ ...prev, [categoryName]: !prev[categoryName] }))
