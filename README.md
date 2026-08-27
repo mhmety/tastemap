@@ -49,6 +49,19 @@ Security & Exception   Alembic Migrations
 
 ---
 
+## UI & API Showcase
+
+### Restaurant Discovery & Dish Search
+![Homepage](docs/screenshots/homepage.png)
+
+### Venue Details, Live Menu & Reviews
+![Detail Page](docs/screenshots/detailpage.png)
+
+### Interactive API Documentation (Swagger)
+![Swagger UI](docs/screenshots/swagger.png)
+
+---
+
 ## Project Workflow
 
 ### 1. Data Ingestion & Character Sanitization
@@ -88,8 +101,8 @@ Security & Exception   Alembic Migrations
 
 - **Dish-First Search:** Discover meals directly with accurate pricing instead of browsing generic venue lists.
 - **Robust Data Pipeline:** Sanitized real-world review datasets and normalized unstructured digital menus.
-- **Production-Ready Security:** Hardened CORS, parameterized ORM queries against SQL injection, and zero-leak exception handling.
 - **Progressive Menu Coverage:** Currently includes fully enriched digital menus for launch venues; automated ingestion pipeline is expanding coverage for remaining locations progressively.
+- **Production-Ready Security:** Hardened CORS, parameterized ORM queries against SQL injection, and zero-leak exception handling.
 
 ---
 
