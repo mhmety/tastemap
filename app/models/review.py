@@ -67,3 +67,10 @@ class Review(Base):
         back_populates="reviews",
     )
 
+    @property
+    def author_name(self) -> str | None:
+        if self.user:
+            return self.user.username
+        return None
+
+

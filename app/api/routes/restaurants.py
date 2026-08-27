@@ -332,7 +332,7 @@ def get_restaurant_detail(
         select(Restaurant)
         .options(
             selectinload(Restaurant.menu_items),
-            selectinload(Restaurant.reviews),
+            selectinload(Restaurant.reviews).selectinload(Review.user),
             selectinload(Restaurant.google_reviews),
         )
         .where(Restaurant.id == restaurant_id)
@@ -372,6 +372,7 @@ def get_restaurant_detail(
         combined_items.append((sort_dt, payload))
 
     for review in tastemap_reviews:
+        author_name = review.user.username if review.user else None
         combined_items.append(
             (
                 review.created_at,
@@ -382,7 +383,7 @@ def get_restaurant_detail(
                     "comment": review.comment,
                     "created_at": review.created_at,
                     "updated_at": review.updated_at,
-                    "author_name": None,
+                    "author_name": author_name,
                     "profile_photo": None,
                     "likes": None,
                     "source": "user",
@@ -484,7 +485,9 @@ def create_restaurant_review(
     db.add(review)
     db.commit()
     db.refresh(review)
+    review.user = current_user
     return review
+
 
 
 @router.post(

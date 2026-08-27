@@ -108,6 +108,7 @@ def create_review(
     db.add(review)
     db.commit()
     db.refresh(review)
+    review.user = current_user
 
     return review
 
@@ -136,7 +137,9 @@ def get_review(
 
     - **review_id**: UUID of the review to fetch.
     """
-    query = select(Review).where(Review.id == review_id)
+    from sqlalchemy.orm import selectinload
+
+    query = select(Review).options(selectinload(Review.user)).where(Review.id == review_id)
     result = db.execute(query)
     review = result.scalar_one_or_none()
 
@@ -163,6 +166,14 @@ def get_review(
         422: {"description": "Validation error in the request."},
     },
 )
+@router.patch(
+    "/{review_id}",
+    response_model=ReviewResponse,
+    summary="Patch a review",
+    description="Partially update a review owned by the current user, or by an admin.",
+    response_description="The updated review.",
+    include_in_schema=False,
+)
 def update_review(
     review_id: Annotated[
         uuid.UUID,
@@ -181,7 +192,9 @@ def update_review(
 
     - **review_id**: UUID of the review to update.
     """
-    query = select(Review).where(Review.id == review_id)
+    from sqlalchemy.orm import selectinload
+
+    query = select(Review).options(selectinload(Review.user)).where(Review.id == review_id)
     result = db.execute(query)
     review = result.scalar_one_or_none()
 
@@ -203,6 +216,8 @@ def update_review(
 
     db.commit()
     db.refresh(review)
+    if not review.user:
+        review.user = current_user
 
     return review
 
@@ -256,3 +271,4 @@ def delete_review(
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+

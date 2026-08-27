@@ -5,7 +5,7 @@ import type { JSX } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
-import { createRestaurantReview } from '../api/reviews'
+import { createRestaurantReview, deleteReview, updateReview } from '../api/reviews'
 import { ContactChips } from '../components/ContactChips'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { FavoriteButton } from '../components/FavoriteButton'
@@ -146,6 +146,25 @@ export function RestaurantDetailPage(): JSX.Element {
       setIsSubmittingReview(false)
     }
   }, [applyReviewCreated, comment, id, isAuthenticated, refetch, selectedRating])
+
+  const handleEditReview = useCallback(
+    async (reviewId: string, rating: number, comment: string | null): Promise<void> => {
+      await updateReview(reviewId, { rating, comment })
+      setToastMessage('Yorumunuz başarıyla güncellendi.')
+      await refetch()
+    },
+    [refetch],
+  )
+
+  const handleDeleteReview = useCallback(
+    async (reviewId: string): Promise<void> => {
+      await deleteReview(reviewId)
+      setToastMessage('Yorumunuz başarıyla silindi.')
+      await refetch()
+    },
+    [refetch],
+  )
+
 
   usePageTitle(restaurant ? restaurant.name : 'Restoran Detayı')
 
@@ -471,9 +490,15 @@ export function RestaurantDetailPage(): JSX.Element {
             </div>
           </div>
 
-          <ReviewList reviews={restaurant.reviews} featuredReview={restaurant.user_review} />
+          <ReviewList
+            reviews={restaurant.reviews}
+            featuredReview={restaurant.user_review}
+            onEditReview={handleEditReview}
+            onDeleteReview={handleDeleteReview}
+          />
         </div>
       </section>
+
 
       {/* Çalışma Saatleri Modalı */}
       {operatingHoursRows ? (
