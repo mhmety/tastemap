@@ -1,23 +1,62 @@
-# Environment
+# Environment & Secrets
 .env
+.env.*
+!.env.example
+opencode.json
+
+# Logs
+*.log
+*.log.*
+logs/
+
+# Database dumps & backups
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.backup
+tastemap_backup*.sql
+tastemap_before_*.sql
 
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 *.egg-info/
 .venv/
 venv/
+ENV/
+.ruff_cache/
+.pytest_cache/
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
 dist/
 build/
+frontend/dist/
+bundle_cache.js
+*.bundle.js
+.npm/
+.eslintcache
+*.tsbuildinfo
 
-# IDE
+# Local maintenance & Scratch Scripts
+_*.py
+repair_db.py
+menu_restore.py
+fix_menu_prices.py
+test_db.py
+
+# IDE & OS
 .idea/
 .vscode/
 *.swp
-
-# OS
+*.swo
+*~
 .DS_Store
 Thumbs.db
-
-# OpenCode configuration / secrets
-opencode.json

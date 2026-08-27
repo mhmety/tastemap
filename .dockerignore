@@ -1,0 +1,50 @@
+# Version Control
+.git/
+.gitignore
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+opencode.json
+
+# Python caches & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/
+coverage/
+
+# Database dumps & backups
+*.sql
+*.dump
+*.bak
+*.backup
+
+# Logs
+*.log
+logs/
+
+# Frontend & Node
+frontend/
+node_modules/
+dist/
+build/
+bundle_cache.js
+
+# Scratch & Maintenance
+_*.py
+repair_db.py
+menu_restore.py
+fix_menu_prices.py
+test_db.py
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

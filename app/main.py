@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.routes import auth, favorites, health, restaurants, reviews
+from app.core.config import settings
 
-allowed_origins = ["http://localhost:5173"]
+logger = logging.getLogger(__name__)
 
 openapi_tags = [
     {
@@ -55,14 +58,29 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error(
+        f"Unhandled server error processing {request.method} {request.url.path}: {exc}",
+        exc_info=True,
+    )
+    detail = "An internal server error occurred." if not settings.debug else str(exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": detail},
+    )
+
 
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(restaurants.router)
 app.include_router(reviews.router)
 app.include_router(favorites.router)
+
