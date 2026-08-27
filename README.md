@@ -1,4 +1,3 @@
-```markdown
 # TasteMap - Dish-Centric Restaurant Discovery Platform
 
 ## Overview
@@ -13,30 +12,27 @@ The project emphasizes full-stack architectural integrity, character encoding re
 
 ## Architecture
 
-
-```
-
+```text
 React (TypeScript + Vite)
-│
-▼
-FastAPI Backend (REST API)
-│
-┌───────┴───────────────────┐
-▼                           ▼
+          │
+          ▼
+ FastAPI Backend (REST API)
+          │
+  ┌───────┴───────────────────┐
+  ▼                           ▼
 JWT Auth / Argon2      SQLAlchemy ORM
-│                           │
-▼                           ▼
+  │                           │
+  ▼                           ▼
 Security & Exception   Alembic Migrations
-Middleware                │
-│                           ▼
-└───────────┬───────────────┘
-▼
-PostgreSQL Database
-▲
-│
-Data Enrichment Pipeline
-(SerpAPI + Menu Extraction)
-
+    Middleware                │
+  │                           ▼
+  └───────────┬───────────────┘
+              ▼
+    PostgreSQL Database
+              ▲
+              │
+  Data Enrichment Pipeline
+ (SerpAPI + Menu Extraction)
 ```
 
 ---
@@ -110,40 +106,29 @@ Data Enrichment Pipeline
    ```bash
    git clone [https://github.com/yourusername/tastemap.git](https://github.com/yourusername/tastemap.git)
    cd tastemap
-
-```
+   ```
 
 2. Configure environment variables:
-```bash
-cp .env.example .env
-cp frontend/.env.example frontend/.env
-
-```
-
+   ```bash
+   cp .env.example .env
+   cp frontend/.env.example frontend/.env
+   ```
 
 3. Launch services via Docker Compose:
-```bash
-docker compose up --build
-
-```
-
+   ```bash
+   docker compose up --build
+   ```
 
 4. Access the applications:
-* Frontend: `http://localhost:5173`
-* API Documentation (Swagger): `http://localhost:8000/docs`
-
-
+   - **Frontend:** `http://localhost:5173`
+   - **API Documentation (Swagger):** `http://localhost:8000/docs`
 
 ---
 
 ## Learning Outcomes
 
-* Full-Stack Web Architecture (FastAPI + React + PostgreSQL)
-* Data Ingestion, Scraping, and Character Encoding Remediation
-* Relational Database Modeling and Alembic Migration Management
-* Stateless Authentication and Role-Based Authorization
-* Container Orchestration and Secure Deployment Practices
-
-```
-
-```
+- Full-Stack Web Architecture (FastAPI + React + PostgreSQL)
+- Data Ingestion, Scraping, and Character Encoding Remediation
+- Relational Database Modeling and Alembic Migration Management
+- Stateless Authentication and Role-Based Authorization
+- Container Orchestration and Secure Deployment Practices
