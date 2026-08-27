@@ -59,7 +59,6 @@ Security & Exception   Alembic Migrations
 
 ### Interactive API Documentation (Swagger)
 ![Swagger UI](docs/screenshots/swagger.png)
-
 ---
 
 ## Project Workflow
