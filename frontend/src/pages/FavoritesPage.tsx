@@ -61,7 +61,7 @@ export function FavoritesPage(): JSX.Element {
         setRestaurants(data)
       } catch {
         if (isCancelled) return
-        setRestaurantError('Unable to load favorite restaurants right now. Please try again.')
+        setRestaurantError('Favorileri yükleme başarısız. Lütfen tekrar deneyin.')
         setRestaurants([])
       } finally {
         if (!isCancelled) {
@@ -83,12 +83,12 @@ export function FavoritesPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
       <header className="space-y-2">
-        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Favorites</h1>
-        <p className="text-lg text-slate-600">Your saved restaurants in one place.</p>
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Favoriler</h1>
+        <p className="text-lg text-slate-600">Kaydettiğiniz restoranlar.</p>
       </header>
 
       <section className="mt-10 space-y-6">
-        {isLoading ? <Loading label="Loading favorites..." /> : null}
+        {isLoading ? <Loading label="Favoriler yükleniyor..." /> : null}
 
         {!isLoading && error ? (
           <ErrorMessage message={error} onRetry={() => void favorites.loadFavorites()} />
@@ -100,10 +100,10 @@ export function FavoritesPage(): JSX.Element {
               <Heart className="fill-orange-200" size={24} />
             </div>
             <h2 className="mt-5 text-2xl font-semibold text-slate-900">
-              No favorite restaurants yet.
+              Henüz favori restoran yok.
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Open a restaurant and use the heart button on the detail page to add it to favorites.
+              Bir restoran açın ve detay sayfasındaki kalp butonunu kullanarak favori ekleyin.
             </p>
           </div>
         ) : null}

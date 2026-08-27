@@ -7,18 +7,18 @@ import { usePageTitle } from '../hooks/usePageTitle'
 const highlights = [
   {
     icon: Search,
-    title: 'Explore by craving',
-    description: 'Start with a dish, neighborhood, or cuisine and discover places worth visiting.',
+    title: 'İsteklere Göre Keşfet',
+    description: 'Bir yemek, mahalle veya mutfak seçerek restoranları keşfedin.',
   },
   {
     icon: Star,
-    title: 'Collect favorites',
-    description: 'Save the restaurants you want to revisit once authentication is connected.',
+    title: 'Favorileri Topla',
+    description: 'Hesabınıza giriş yaptığınızda tekrar ziyaret etmek istediğiniz restoranları kaydedin.',
   },
   {
     icon: MapPinned,
-    title: 'Plan food routes',
-    description: 'Build a clear browsing experience for city-based restaurant discovery.',
+    title: 'Yemeklerle Yol Planla',
+    description: 'Şehir bazlı restoran keşfi deneyimi oluşturun.',
   },
 ]
 
@@ -29,16 +29,16 @@ export function HomePage(): JSX.Element {
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
       <section className="grid gap-10 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm lg:grid-cols-[1.2fr_0.8fr] lg:p-12">
         <div className="space-y-6">
-          <span className="inline-flex rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
-            TasteMap Frontend Foundation
-          </span>
+<span className="inline-flex rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
+              TasteMap Temel Yapısı
+            </span>
           <div className="space-y-4">
             <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-              Discover food first, then the places behind it.
+              Yemekle Önce Yerler Arasını Keşfedin.
             </h1>
             <p className="max-w-2xl text-lg text-slate-600">
-              This first frontend sprint sets up the navigation, shared layout, routing, and API
-              client structure for the TasteMap experience.
+              Bu ilk frontend süreci, navigasyon, paylaşılan layout, routing ve API istemcisinin
+              yapısı için temel oluşturuyor.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -46,14 +46,14 @@ export function HomePage(): JSX.Element {
               className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
               to="/restaurants"
             >
-              Browse Restaurants
+              Restoranları Tarayın
               <ArrowRight size={16} />
             </Link>
             <Link
               className="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:text-orange-600"
               to="/register"
             >
-              Create an Account
+              Hesap Oluşturun
             </Link>
           </div>
         </div>
@@ -61,14 +61,14 @@ export function HomePage(): JSX.Element {
         <div className="rounded-[1.5rem] bg-slate-50 p-6">
           <div className="space-y-4">
             <div className="rounded-2xl border border-white bg-white p-4 shadow-sm">
-              <p className="text-sm font-medium text-slate-500">Frontend stack</p>
+              <p className="text-sm font-medium text-slate-500">Frontend Yığıtı</p>
               <p className="mt-2 text-lg font-semibold text-slate-900">
                 Vite, React, TypeScript, Router, Axios, TailwindCSS, Lucide
               </p>
             </div>
             <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
-              Authentication forms and business logic are intentionally left unconnected in this
-              sprint so the project can focus on structure first.
+              Oturum açma ve kayıt işlemleri bu sprinte dahil edilerek yapıldı, bu sayede
+              proje yapısına odaklanılabilir.
             </div>
           </div>
         </div>

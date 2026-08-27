@@ -93,7 +93,7 @@ export function RestaurantDetailPage(): JSX.Element {
   const submitReview = useCallback(async () => {
     if (!id) return
     if (!isAuthenticated) {
-      setReviewError('Login required')
+      setReviewError('Yorum yapabilmek için giriş yapmanız gerekiyor.')
       return
     }
     if (selectedRating < 1 || selectedRating > 5) return
@@ -122,29 +122,29 @@ export function RestaurantDetailPage(): JSX.Element {
       setSelectedRating(0)
       setHoverRating(0)
       setComment('')
-      setToastMessage('Review submitted')
+      setToastMessage('Yorumunuz gönderildi.')
       await refetch()
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status
         if (status === 401) {
-          setReviewError('Login required')
+          setReviewError('Giriş yapılmalı.')
         } else if (status === 409) {
-          setReviewError('You already reviewed this restaurant.')
+          setReviewError('Bu restorana zaten yorum yapılmış.')
         } else {
           setReviewError(
-            normalizeApiErrorMessage(error, 'Unable to submit review right now.'),
+            normalizeApiErrorMessage(error, 'Yorum yapılamıyor.')
           )
         }
       } else {
-        setReviewError('Unable to submit review right now.')
+        setReviewError('Yorum yapılamıyor.')
       }
     } finally {
       setIsSubmittingReview(false)
     }
   }, [applyReviewCreated, comment, id, isAuthenticated, refetch, selectedRating])
 
-  usePageTitle(restaurant ? restaurant.name : 'Restaurant Details')
+  usePageTitle(restaurant ? restaurant.name : 'Restoran Detayı')
 
   const handleToggleFavorite = (restaurantId: string): void => {
     if (!isAuthenticated) {
@@ -158,7 +158,7 @@ export function RestaurantDetailPage(): JSX.Element {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <Loading label="Loading restaurant details..." />
+        <Loading label="Restoran detayları yükleniyor..." />
       </div>
     )
   }
@@ -172,7 +172,7 @@ export function RestaurantDetailPage(): JSX.Element {
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-orange-600"
           >
             <ArrowLeft size={16} />
-            Back to restaurants
+            Restoranlara Dön
           </Link>
         </div>
         <ErrorMessage message={error} onRetry={() => void refetch()} />
@@ -184,15 +184,15 @@ export function RestaurantDetailPage(): JSX.Element {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-[1.5rem] border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Restaurant not found</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Restoran bulunamadı</h1>
           <p className="mt-2 text-sm text-slate-600">
-            The restaurant you are looking for does not exist or was removed.
+            Aradığınız restoran bulunamadı veya kaldırılmış olabilir.
           </p>
           <Link
             to={backTo}
             className="mt-6 inline-flex items-center justify-center rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
           >
-            Browse restaurants
+            Restoranları Tara
           </Link>
         </div>
       </div>
@@ -200,7 +200,7 @@ export function RestaurantDetailPage(): JSX.Element {
   }
 
   const ratingValue = restaurant.rating ?? restaurant.average_rating
-  const ratingText = ratingValue == null ? 'Unrated' : ratingValue.toFixed(1)
+  const ratingText = ratingValue == null ? 'Değerlendirilmedi' : ratingValue.toFixed(1)
   const reviewCountText = restaurant.review_count == null ? null : restaurant.review_count.toLocaleString()
 
   const phoneValue = restaurant.phone?.trim() ? restaurant.phone.trim() : null
@@ -283,7 +283,7 @@ export function RestaurantDetailPage(): JSX.Element {
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-orange-600"
         >
           <ArrowLeft size={16} />
-          Back to restaurants
+          Restoranlara Dön
         </Link>
       </div>
 
@@ -342,7 +342,7 @@ export function RestaurantDetailPage(): JSX.Element {
 
               <button
                 type="button"
-                aria-label="Scroll to reviews"
+                aria-label="Yorumlara git"
                 className="group flex w-full cursor-pointer flex-col gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-sm active:translate-y-0"
                 onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               >
@@ -351,7 +351,7 @@ export function RestaurantDetailPage(): JSX.Element {
                   <span>{ratingText}</span>
                 </div>
                 <div className="text-sm text-slate-600 group-hover:text-slate-700">
-                  {reviewCountText ? `${reviewCountText} Reviews` : 'Reviews'}
+                  {reviewCountText ? `${reviewCountText} Yorum` : 'Yorum'}
                 </div>
               </button>
 
@@ -367,7 +367,7 @@ export function RestaurantDetailPage(): JSX.Element {
                     href={googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`Open ${restaurant.name} in Google Maps`}
+                    aria-label={`${restaurant.name} Google Haritalarında Aç`}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#4285F4]/30 bg-white text-[#4285F4] transition duration-200 hover:-translate-y-0.5 hover:border-[#4285F4]/60 hover:bg-[#4285F4]/5 hover:shadow-sm active:translate-y-0"
                   >
                     <MapPin size={18} />
@@ -378,7 +378,7 @@ export function RestaurantDetailPage(): JSX.Element {
               {descriptionValue ? (
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                   <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Description
+                    Açıklama
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{descriptionValue}</p>
                 </div>
@@ -398,14 +398,16 @@ export function RestaurantDetailPage(): JSX.Element {
         <OperatingHoursAccordion rows={operatingHoursRows} todayLabel={todayLabel} todayValue={todayHoursValue} />
       ) : null}
 
-      <section className="mt-10 grid gap-6 lg:grid-cols-2">
-        <MenuList items={restaurant.menu_items} />
-        <div ref={reviewsRef}>
+      <section className="mt-10 grid gap-6 lg:grid-cols-2 auto-rows-[minmax(0,1fr)]">
+        <div className="h-0 min-h-full">
+          <MenuList items={restaurant.menu_items} />
+        </div>
+        <div ref={reviewsRef} className="min-h-0">
           <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-slate-900">Write a review</h3>
-                <p className="text-sm text-slate-600">Share your experience...</p>
+                <h3 className="text-lg font-semibold text-slate-900">Yorum Yap</h3>
+                <p className="text-sm text-slate-600">Deneyiminizi paylaşın...</p>
               </div>
             </div>
 
@@ -418,7 +420,7 @@ export function RestaurantDetailPage(): JSX.Element {
                     key={`review-star-${value}`}
                     type="button"
                     className="rounded-lg p-1 text-amber-500 transition hover:scale-105"
-                    aria-label={`Rate ${value} stars`}
+                    aria-label={`${value} Yıldız Puanla`}
                     onMouseEnter={() => setHoverRating(value)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setSelectedRating(value)}
@@ -432,7 +434,7 @@ export function RestaurantDetailPage(): JSX.Element {
 
             <textarea
               className="mt-4 h-28 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-orange-200 focus:ring-2 focus:ring-orange-100"
-              placeholder="Share your experience..."
+              placeholder="Deneyiminizi paylaşın..."
               value={comment}
               maxLength={1000}
               onChange={(event) => setComment(event.target.value)}
@@ -450,7 +452,7 @@ export function RestaurantDetailPage(): JSX.Element {
                 disabled={!canSubmitReview}
                 className="inline-flex items-center justify-center rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
               >
-                {isSubmittingReview ? 'Submitting…' : 'Submit Review'}
+                {isSubmittingReview ? 'Gönderiliyor…' : 'Yorum Gönder'}
               </button>
             </div>
           </div>

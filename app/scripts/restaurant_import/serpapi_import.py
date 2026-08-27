@@ -140,15 +140,12 @@ def _extract_int(value: Any) -> Optional[int]:
 
 
 def _repair_text(value: str) -> str:
-    text = value
-    for encoding in ("latin1", "cp1252"):
-        try:
-            repaired = text.encode(encoding).decode("utf-8")
-        except (UnicodeEncodeError, UnicodeDecodeError):
-            continue
-        if repaired != text:
-            text = repaired
-    return text
+    """Pass-through: SerpAPI returns valid UTF-8 JSON, so no repair needed.
+    
+    The original latin1/cp1252 round-trip was ineffective and could corrupt
+    valid UTF-8 text (e.g., Turkish characters ç ğ ı ö ş ü).
+    """
+    return value
 
 
 def _repair_value(value: Any) -> Any:

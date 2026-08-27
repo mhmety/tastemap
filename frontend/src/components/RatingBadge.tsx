@@ -6,7 +6,7 @@ interface RatingBadgeProps {
 }
 
 function formatRating(rating: number | null): string {
-  return rating === null ? 'Unrated' : `${rating.toFixed(1)}/5`
+  return rating === null ? 'Değerlendirilmedi' : `${rating.toFixed(1)}/5`
 }
 
 export function RatingBadge({ rating }: RatingBadgeProps): JSX.Element {

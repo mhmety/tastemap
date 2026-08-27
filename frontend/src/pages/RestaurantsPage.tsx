@@ -86,22 +86,21 @@ export function RestaurantsPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
       <section className="space-y-4">
-        <span className="inline-flex rounded-full bg-slate-100 px-4 py-1 text-sm font-medium text-slate-700">
-          Discovery Page Foundation
-        </span>
+<span className="inline-flex rounded-full bg-slate-100 px-4 py-1 text-sm font-medium text-slate-700">
+              Keşif Sayfası Temeli
+            </span>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
-              Restaurants
+              Restoranlar
             </h1>
             <p className="mt-3 max-w-2xl text-lg text-slate-600">
-              Browse real restaurant data from the TasteMap backend with search, pagination, and
-              responsive card-based browsing.
+              Gerçek TasteMap backend verilerini arama, sayfalama ve kart bazlı gezinleme ile keşfedin.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
             <SlidersHorizontal size={16} />
-            Search and pagination are powered by the live API
+              Arama ve sayfalama canlı API ile desteklenir
           </div>
         </div>
       </section>
@@ -117,14 +116,12 @@ export function RestaurantsPage(): JSX.Element {
 
       <section className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
         <aside className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Results overview</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Sonuç Özeti</h2>
           <ul className="mt-4 space-y-3 text-sm text-slate-600">
-            <li>Search term: {submittedSearch || 'All restaurants'}</li>
-            <li>Total matches: {total}</li>
-            <li>Page size: {PAGE_SIZE}</li>
-            <li>
-              Current page: {currentPage} / {totalPages}
-            </li>
+            <li>Arama terimi: {submittedSearch || 'Tüm restoranlar'}</li>
+            <li>Toplam eşleşme: {total}</li>
+            <li>Sayfa boyutu: {PAGE_SIZE}</li>
+            <li>Şu sayfa: {currentPage} / {totalPages}</li>
           </ul>
         </aside>
 
@@ -143,7 +140,7 @@ export function RestaurantsPage(): JSX.Element {
 
           <div className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-600">
-              Showing {restaurants.length} of {total} restaurants
+              {restaurants.length} of {total} restoranı gösteriliyor
             </p>
             <div className="flex items-center gap-3">
               <button
@@ -160,8 +157,8 @@ export function RestaurantsPage(): JSX.Element {
                   })
                 }}
               >
-                <ChevronLeft size={16} />
-                Previous
+<ChevronLeft size={16} />
+              Önceki
               </button>
               <button
                 type="button"
@@ -177,7 +174,7 @@ export function RestaurantsPage(): JSX.Element {
                   })
                 }}
               >
-                Next
+                Sonraki
                 <ChevronRight size={16} />
               </button>
             </div>

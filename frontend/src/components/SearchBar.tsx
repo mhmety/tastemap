@@ -32,7 +32,7 @@ export function SearchBar({
         <input
           type="search"
           value={value}
-          placeholder="Search by restaurant name or dish"
+          placeholder="Restoran adı veya yemek ara"
           className="w-full rounded-full border border-slate-200 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-orange-400"
           onChange={(event) => onChange(event.target.value)}
         />
@@ -42,7 +42,7 @@ export function SearchBar({
         disabled={isLoading}
         className="rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
       >
-        Search
+Ara
       </button>
     </form>
   )

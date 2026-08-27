@@ -16,10 +16,10 @@ export function OperatingHoursAccordion({
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const todayText = todayValue?.trim() ? todayValue.trim() : null
   const todayStatusLabel = (() => {
-    if (!todayText) return 'Open today'
+    if (!todayText) return 'Bugün'
     const lowered = todayText.toLowerCase()
-    if (lowered === 'closed' || lowered.startsWith('closed')) return 'Closed today'
-    return 'Open today'
+    if (lowered === 'closed' || lowered.startsWith('closed')) return 'Bugün Kapalı'
+    return 'Bugün Açık'
   })()
 
   return (
@@ -30,7 +30,7 @@ export function OperatingHoursAccordion({
         onClick={() => setIsOpen((current) => !current)}
       >
         <div className="space-y-1">
-          <div className="text-lg font-semibold text-slate-900">Opening hours</div>
+          <div className="text-lg font-semibold text-slate-900">Çalışma Saatleri</div>
           {todayText ? (
             <div className="flex items-start gap-3 text-sm text-slate-600">
               <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-500">
@@ -42,7 +42,7 @@ export function OperatingHoursAccordion({
               </div>
             </div>
           ) : null}
-          <div className="text-sm font-semibold text-orange-600">{isOpen ? 'Hide weekly schedule' : '▼ Weekly Schedule'}</div>
+          <div className="text-sm font-semibold text-orange-600">{isOpen ? 'Haftalık Programı Gizle' : '▼ Haftalık Program'}</div>
         </div>
         <ChevronDown
           size={20}

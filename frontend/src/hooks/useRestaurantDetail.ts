@@ -12,7 +12,7 @@ interface UseRestaurantDetailResult {
   applyReviewCreated: (review: Review) => void
 }
 
-const DEFAULT_ERROR_MESSAGE = 'Unable to load restaurant details right now. Please try again.'
+const DEFAULT_ERROR_MESSAGE = 'Restorani yükleme başarısız. Lütfen tekrar deneyin.'
 
 export function useRestaurantDetail(restaurantId: string | undefined): UseRestaurantDetailResult {
   const [restaurant, setRestaurant] = useState<RestaurantDetailResponse | null>(null)

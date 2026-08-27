@@ -19,7 +19,7 @@ function formatRelativeDate(dateValue: string | null | undefined): string | null
   const hours = Math.round(minutes / 60)
   const days = Math.round(hours / 24)
 
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+  const rtf = new Intl.RelativeTimeFormat('tr', { numeric: 'auto' })
   if (Math.abs(days) >= 1) return rtf.format(days, 'day')
   if (Math.abs(hours) >= 1) return rtf.format(hours, 'hour')
   if (Math.abs(minutes) >= 1) return rtf.format(minutes, 'minute')
@@ -42,9 +42,9 @@ function StarsRow({ rating }: { rating: number }): JSX.Element {
 }
 
 function formatReviewerLabel(userId: string | null | undefined): string {
-  if (!userId) return 'Reviewer'
-  if (userId.length <= 10) return `User ${userId}`
-  return `User ${userId.slice(0, 8)}…`
+  if (!userId) return 'Değerlendirici'
+  if (userId.length <= 10) return `Kullanıcı ${userId}`
+  return `Kullanıcı ${userId.slice(0, 8)}…`
 }
 
 export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.Element {
@@ -57,8 +57,8 @@ export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.El
         <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
           <MessageCircle size={20} />
         </div>
-        <h3 className="mt-6 text-lg font-semibold text-slate-900">No reviews yet.</h3>
-        <p className="mt-2 text-sm text-slate-600">Be the first person to share an experience.</p>
+        <h3 className="mt-6 text-lg font-semibold text-slate-900">Yorum Henüz Yok</h3>
+        <p className="mt-2 text-sm text-slate-600">Deneyimi paylaşın.</p>
       </div>
     )
   }
@@ -69,7 +69,7 @@ export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.El
       rating: review.rating,
       reviewer:
         review.source === 'google'
-          ? (review.author_name?.trim() ? review.author_name.trim() : 'Google reviewer')
+          ? (review.author_name?.trim() ? review.author_name.trim() : 'Google yorumcusu')
           : formatReviewerLabel(review.user_id),
       source: review.source ?? 'user',
       relativeDate: formatRelativeDate(review.created_at),
@@ -80,7 +80,7 @@ export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.El
       {
         id: 'featured',
         rating: null as number | null,
-        reviewer: 'Featured review',
+        reviewer: 'Öne Çıkan Yorum',
         source: 'google' as const,
         relativeDate: null,
         text: featuredValue,
@@ -92,7 +92,7 @@ export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.El
     <div className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-2 text-slate-900">
         <MessageCircle size={18} />
-        <h3 className="text-lg font-semibold">Reviews</h3>
+        <h3 className="text-lg font-semibold">Yorumlar</h3>
       </div>
       <div className="mt-4 max-h-[560px] overflow-y-auto pr-1 sm:max-h-[640px]">
         <ul className="space-y-4">
@@ -115,18 +115,18 @@ export function ReviewList({ reviews, featuredReview }: ReviewListProps): JSX.El
                           : 'rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700'
                       }
                     >
-                      {item.source === 'google' ? 'Google' : 'TasteMap'}
+                      {item.source === 'google' ? 'Google' : 'Lezzet Haritası'}
                     </span>
                     {item.isFeatured ? (
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                        Featured
+                        Öne Çıkarılmış
                       </span>
                     ) : null}
                   </div>
                   {item.text ? (
                     <p className="text-sm leading-6 text-slate-700">{item.text}</p>
                   ) : (
-                    <p className="text-sm leading-6 text-slate-500">No comment provided.</p>
+                    <p className="text-sm leading-6 text-slate-500">Yorum sağlanmadı.</p>
                   )}
                 </div>
 

@@ -22,7 +22,7 @@ export function LoginPage(): JSX.Element {
     clearError()
 
     if (!email.trim() || !password) {
-      setFormError('Email and password are required.')
+      setFormError('E-posta ve parola gereklidir.')
       return
     }
 
@@ -41,15 +41,15 @@ export function LoginPage(): JSX.Element {
       <div className="mx-auto max-w-md rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
         <div className="space-y-3 text-center">
           <span className="inline-flex rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
-            Account Access
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Login</h1>
+              Hesap Erişimi
+            </span>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Giriş</h1>
           <p className="text-sm leading-6 text-slate-600">
-            Sign in to access your favorites and continue exploring restaurants.
-          </p>
+              Favorilerinize erişin ve restoranları keşfedin.
+            </p>
           {fromPath ? (
             <p className="text-xs font-medium text-slate-500">
-              Please log in to continue.
+              Devam etmek için giriş yapın.
             </p>
           ) : null}
         </div>
@@ -62,9 +62,8 @@ export function LoginPage(): JSX.Element {
           }}
         >
           <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-              <Mail size={16} />
-              Email
+<span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+              <Mail size={16} /> E-posta
             </span>
             <input
               type="email"
@@ -77,13 +76,12 @@ export function LoginPage(): JSX.Element {
           </label>
 
           <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-              <LockKeyhole size={16} />
-              Password
+<span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+              <LockKeyhole size={16} /> Parola
             </span>
             <input
               type="password"
-              placeholder="Enter your password"
+              placeholder="Parolanızı girin"
               autoComplete="current-password"
               value={password}
               className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400"
@@ -104,7 +102,7 @@ export function LoginPage(): JSX.Element {
             disabled={isLoading}
             className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-500"
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Giriş yapılıyor...' : 'Giriş'}
           </button>
         </form>
       </div>

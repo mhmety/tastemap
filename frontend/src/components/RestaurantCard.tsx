@@ -14,7 +14,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps): JSX.Element
   const location = useLocation()
 
   const ratingText = useMemo(() => {
-    if (restaurant.rating == null) return 'Unrated'
+    if (restaurant.rating == null) return 'Değerlendirilmedi'
     return restaurant.rating.toFixed(1)
   }, [restaurant.rating])
 
@@ -105,7 +105,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps): JSX.Element
             state={{ from: `${location.pathname}${location.search}` }}
             className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition duration-200 group-hover:-translate-y-0.5 group-hover:border-orange-200 group-hover:text-orange-600 group-hover:shadow-sm active:translate-y-0"
           >
-            View Details
+            Detaylar
           </Link>
         </div>
       </div>

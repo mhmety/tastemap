@@ -37,7 +37,7 @@ export function ContactChips({ websiteUrl, phoneLabel, phoneHref }: ContactChips
           className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-600 hover:shadow-md active:translate-y-0 sm:w-[min(280px,calc(50%-0.375rem))]"
         >
           <Globe size={16} className="text-slate-500" />
-          Website
+          Site
         </a>
       ) : null}
     </div>

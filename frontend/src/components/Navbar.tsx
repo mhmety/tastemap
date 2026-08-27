@@ -7,16 +7,16 @@ import { useAuth } from '../hooks/useAuth'
 import type { NavigationItem } from '../types/navigation'
 
 const loggedOutNavigation: NavigationItem[] = [
-  { label: 'Home', to: '/' },
-  { label: 'Restaurants', to: '/restaurants' },
-  { label: 'Login', to: '/login' },
-  { label: 'Register', to: '/register' },
+  { label: 'Ana Sayfa', to: '/' },
+  { label: 'Restoranlar', to: '/restaurants' },
+  { label: 'Giriş', to: '/login' },
+  { label: 'Kayıt', to: '/register' },
 ]
 
 const loggedInNavigation: NavigationItem[] = [
-  { label: 'Home', to: '/' },
-  { label: 'Restaurants', to: '/restaurants' },
-  { label: 'Favorites', to: '/favorites' },
+  { label: 'Ana Sayfa', to: '/' },
+  { label: 'Restoranlar', to: '/restaurants' },
+  { label: 'Favoriler', to: '/favorites' },
 ]
 
 const baseLinkClass =
@@ -48,7 +48,7 @@ export function Navbar(): JSX.Element {
           </span>
           <div className="flex flex-col">
             <span className="text-lg font-semibold tracking-tight">TasteMap</span>
-            <span className="text-xs text-slate-500">Discover food worth trying</span>
+            <span className="text-xs text-slate-500">Lezzet keşfinize çıkın</span>
           </div>
         </NavLink>
 
@@ -71,7 +71,7 @@ export function Navbar(): JSX.Element {
               onClick={handleLogout}
             >
               <LogOut size={16} />
-              Logout
+              Çıkış Yap
             </button>
           ) : null}
         </nav>
@@ -108,7 +108,7 @@ export function Navbar(): JSX.Element {
                 onClick={handleLogout}
               >
                 <LogOut size={16} />
-                Logout
+                Çıkış Yap
               </button>
             ) : null}
           </div>

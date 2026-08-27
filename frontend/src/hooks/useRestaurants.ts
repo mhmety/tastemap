@@ -20,7 +20,7 @@ interface UseRestaurantsResult {
   refetch: () => Promise<void>
 }
 
-const DEFAULT_ERROR_MESSAGE = 'Unable to load restaurants right now. Please try again.'
+const DEFAULT_ERROR_MESSAGE = 'Restoranı yükleme başarısız. Lütfen tekrar deneyin.'
 
 export function useRestaurants(options: UseRestaurantsOptions): UseRestaurantsResult {
   const { search, limit, offset } = options

@@ -22,7 +22,7 @@ export function RegisterPage(): JSX.Element {
     clearError()
 
     if (!username.trim() || !email.trim() || !password) {
-      setFormError('Username, email, and password are required.')
+      setFormError('Kullanıcı adı, e-posta ve parola gereklidir.')
       return
     }
 
@@ -39,12 +39,12 @@ export function RegisterPage(): JSX.Element {
       <div className="mx-auto max-w-md rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
         <div className="space-y-3 text-center">
           <span className="inline-flex rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
-            New Account
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Register</h1>
+              Yeni Hesap
+            </span>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Kayıt</h1>
           <p className="text-sm leading-6 text-slate-600">
-            Create an account to start building your favorite restaurant list.
-          </p>
+              Hesap oluşturarak favori restoran listenizi başlatın.
+            </p>
         </div>
 
         <form
@@ -56,8 +56,7 @@ export function RegisterPage(): JSX.Element {
         >
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-              <UserRound size={16} />
-              Username
+              <UserRound size={16} /> Kullanıcı adı
             </span>
             <input
               type="text"
@@ -71,8 +70,7 @@ export function RegisterPage(): JSX.Element {
 
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-              <Mail size={16} />
-              Email
+              <Mail size={16} /> E-posta
             </span>
             <input
               type="email"
@@ -86,12 +84,11 @@ export function RegisterPage(): JSX.Element {
 
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-              <LockKeyhole size={16} />
-              Password
+              <LockKeyhole size={16} /> Parola
             </span>
             <input
               type="password"
-              placeholder="Create a password"
+              placeholder="Parola oluştur"
               autoComplete="new-password"
               value={password}
               className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400"
@@ -112,7 +109,7 @@ export function RegisterPage(): JSX.Element {
             disabled={isLoading}
             className="w-full rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
           >
-            {isLoading ? 'Creating account...' : 'Register'}
+            {isLoading ? 'Hesap oluşturuluyor...' : 'Kayıt'}
           </button>
         </form>
       </div>

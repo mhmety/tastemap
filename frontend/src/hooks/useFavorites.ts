@@ -16,7 +16,7 @@ interface UseFavoritesResult {
   isUpdating: (restaurantId: string) => boolean
 }
 
-const DEFAULT_ERROR_MESSAGE = 'Unable to update favorites right now. Please try again.'
+const DEFAULT_ERROR_MESSAGE = 'Favorileri güncelleme başarısız. Lütfen tekrar deneyin.'
 
 export function useFavorites(): UseFavoritesResult {
   const { isAuthenticated } = useAuth()
