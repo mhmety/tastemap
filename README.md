@@ -45,6 +45,7 @@ Security & Exception   Alembic Migrations
   Data Enrichment Pipeline
  (SerpAPI + Menu Extraction)
 
+```
 
 ---
 
