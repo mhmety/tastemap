@@ -1,4 +1,4 @@
-```markdown
+
 # TasteMap - Dish-Centric Restaurant Discovery Platform
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-TasteMap%20Web-blue?style=for-the-badge&logo=railway)](https://tastemap.up.railway.app/)
@@ -45,7 +45,6 @@ Security & Exception   Alembic Migrations
   Data Enrichment Pipeline
  (SerpAPI + Menu Extraction)
 
-```
 
 ---
 
@@ -64,10 +63,13 @@ Security & Exception   Alembic Migrations
 ## UI & API Showcase
 
 ### Restaurant Discovery & Dish Search
+![Homepage](docs/screenshots/homeepage.png)
 
 ### Venue Details, Live Menu & Reviews
+![Detail Page](docs/screenshots/restaurantpage.png)
 
 ### Interactive API Documentation (Swagger)
+![Swagger UI](docs/screenshots/swagger.png)
 
 ---
 
